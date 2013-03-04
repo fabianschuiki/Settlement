@@ -47,7 +47,7 @@ void OrbitingCamera::advance(double dt)
 {
 	// The higher the snappiness the quicker the camera animates to its new
 	// coordinates.
-	const double snappiness = 1;
+	const double snappiness = 10;
 
 	// Calculat the distance between the current and target values that is
 	// being covered during this animation step.

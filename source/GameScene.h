@@ -2,6 +2,7 @@
 #pragma once
 #include "Scene.h"
 #include "OrbitingCamera.h"
+#include "TerrainRenderer.h"
 
 /**
  * @brief Renders regular gameplay.
@@ -20,4 +21,10 @@ public:
 	void draw(const RenderInfo &info);
 
 	OrbitingCamera camera;
+
+protected:
+	TerrainRenderer terrainRenderer;
+	bool wireframe;
+	int mouse_x0, mouse_y0;
+	bool mouseDraggingRight;
 };
