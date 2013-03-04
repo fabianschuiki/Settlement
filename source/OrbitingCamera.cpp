@@ -65,7 +65,7 @@ void OrbitingCamera::advance(double dt)
 		sin(inclination_anim),
 		cos(azimuth_anim) * cos(inclination_anim)
 	);
-	double radius = distance * distance; // Gives the camera a constant zooming speed.
-	this->at = poi;
-	this->pos = poi + poiToCamera * radius;
+	double radius = distance_anim * distance_anim; // Gives the camera a constant zooming speed.
+	this->at = poi_anim;
+	this->pos = poi_anim + poiToCamera * radius;
 }

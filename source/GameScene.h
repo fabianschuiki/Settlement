@@ -2,12 +2,13 @@
 #pragma once
 #include "Scene.h"
 #include "OrbitingCamera.h"
-#include "TerrainRenderer.h"
+
+class Terrain;
+class TerrainRenderer;
 
 /**
  * @brief Renders regular gameplay.
  */
-
 class GameScene : public Scene
 {
 public:
@@ -23,7 +24,8 @@ public:
 	OrbitingCamera camera;
 
 protected:
-	TerrainRenderer terrainRenderer;
+	Terrain* terrain;
+	TerrainRenderer* terrainRenderer;
 	bool wireframe;
 	int mouse_x0, mouse_y0;
 	bool mouseDraggingRight;

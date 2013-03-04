@@ -15,6 +15,8 @@ public:
 	/// The terrain elevation at this point.
 	double elevation;
 
+	double gray;
+
 	/**
 	 * @brief The six nodes closest to this.
 	 * Note that some entries may be NULL for nodes at the edge of the terrain.

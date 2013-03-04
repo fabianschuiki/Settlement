@@ -1,16 +1,40 @@
 /* Copyright © 2013 Fabian Schuiki */
 #include "GameScene.h"
 #include "Application.h"
+#include "Terrain.h"
+#include "TerrainRenderer.h"
 #include <SFML/OpenGL.hpp>
+#include <fstream>
 
 GameScene::GameScene(Application *app) : Scene(app)
 {
 	wireframe = false;
 	mouseDraggingRight = false;
+
+	// Create terrain for testing purposes.
+	terrain = new Terrain(200, 200);
+	terrainRenderer = new TerrainRenderer;
+	terrainRenderer->setTerrain(terrain);
 }
 
 void GameScene::initialize()
 {
+	// Load heightmap for debugging.
+	std::ifstream fin("assets/heightmap.raw");
+	const double ah = 0.01;
+	for (int y = 0; y < 200; y++) {
+		for (int x = 0; x < 200; x++) {
+			unsigned char a;
+			fin.read((char *)&a, 1);
+			TerrainNode &n = terrain->nodes[y * 200 + x];
+			n.elevation = a * ah;
+			n.gray = (double)a / 255;
+		}
+	}
+	fin.close();
+
+	// Update the terrain renderer.
+	terrainRenderer->update();
 }
 
 bool GameScene::handleEvent(const sf::Event &event)
@@ -54,6 +78,22 @@ bool GameScene::handleEvent(const sf::Event &event)
 			return true;
 		}
 	}
+	if (event.type == sf::Event::MouseWheelMoved) {
+		LOG(kLogDebug, "Mouse wheel delta %i", event.mouseWheel.delta);
+		camera.distance = std::max(1.5, std::min(sqrt(100), camera.distance + (double)event.mouseWheel.delta * 0.1));
+		return true;
+	}
+	if (event.type == sf::Event::TextEntered) {
+		vec3 cx(-cos(camera.azimuth), 0, sin(camera.azimuth));
+		vec3 cy( sin(camera.azimuth), 0, cos(camera.azimuth));
+		double d = 0.1 * camera.distance * camera.distance;
+		switch (event.text.unicode) {
+			case 'w': camera.poi -= cy * d; return true;
+			case 's': camera.poi += cy * d; return true;
+			case 'a': camera.poi += cx * d; return true;
+			case 'd': camera.poi -= cx * d; return true;
+		}
+	}
 	return false;
 }
 
@@ -65,7 +105,7 @@ void GameScene::advance(double dt)
 
 void GameScene::draw(const RenderInfo &info)
 {
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	if (wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	// Update the camera viewport.
@@ -81,7 +121,7 @@ void GameScene::draw(const RenderInfo &info)
 	glColor3f(0,0,1); glVertex3f(0,1,0);
 	glEnd();
 
-	terrainRenderer.draw(info);
+	terrainRenderer->draw(info);
 
 	if (wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 

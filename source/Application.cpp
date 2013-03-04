@@ -41,6 +41,7 @@ void Application::initialize()
 	// Initialize the window.
 	LOG(kLogDebug, "Creating Window");
 	sf::ContextSettings settings;
+	settings.depthBits = 24;
 	window.create(sf::VideoMode(1280, 768), "Settlement", sf::Style::Default, settings);
 	window.setVerticalSyncEnabled(true);
 

@@ -3,6 +3,7 @@
 #include "TerrainCell.h"
 #include "TerrainNode.h"
 #include <gc_cpp.h>
+#include <vector>
 
 /**
  * Model class that maintains the world's terrain data.
@@ -16,7 +17,11 @@ public:
 
 	Terrain(unsigned int w, unsigned int h);
 
+	typedef std::vector<TerrainCell> Cells;
+	typedef std::vector<TerrainNode> Nodes;
+
+	Cells cells;
+	Nodes nodes;
+
 protected:
-	typedef std::vector<TerrainCell> CellVector;
-	typedef std::vector<TerrainNode> NodeVector;
 };
