@@ -99,7 +99,6 @@ bool GameScene::handleEvent(const sf::Event &event)
 
 void GameScene::advance(double dt)
 {
-	//camera.azimuth += M_PI / 6 * dt;
 	camera.advance(dt);
 }
 

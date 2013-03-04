@@ -24,4 +24,7 @@ public:
 	Nodes nodes;
 
 protected:
+	unsigned int num_cells_x, num_cells_y;
+	unsigned int num_nodes_x, num_nodes_y;
+	void resize(unsigned int w, unsigned int h);
 };

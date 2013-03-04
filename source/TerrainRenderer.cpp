@@ -37,15 +37,13 @@ void TerrainRenderer::draw(const RenderInfo &info)
 	// Draw the terrain.
 	glBegin(GL_TRIANGLES);
 	for (int x = 0; x < w-1; x++) {
-		for (int y = 0; y < h-2; y += 2) {
+		for (int y = 0; y < h-1; y += 2) {
 			#define node(_x,_y) nodes[(_y) * w + (_x)]
 
 			struct Node &a = node(x, y);
 			struct Node &b = node(x+1, y);
 			struct Node &c = node(x, y+1);
 			struct Node &d = node(x+1, y+1);
-			struct Node &e = node(x, y+2);
-			struct Node &f = node(x+1, y+2);
 
 			#define vertex(v) glColor3f(v.c.x, v.c.y, v.c.z); glNormal3f(v.n.x, v.n.y, v.n.z); glVertex3f(v.p.x, v.p.y, v.p.z)
 
@@ -57,13 +55,18 @@ void TerrainRenderer::draw(const RenderInfo &info)
 			vertex(d);
 			vertex(c);
 
-			vertex(c);
-			vertex(f);
-			vertex(e);
+			if (y+2 < h) {
+				struct Node &e = node(x, y+2);
+				struct Node &f = node(x+1, y+2);
 
-			vertex(c);
-			vertex(d);
-			vertex(f);
+				vertex(c);
+				vertex(f);
+				vertex(e);
+
+				vertex(c);
+				vertex(d);
+				vertex(f);
+			}
 		}
 	}
 	glEnd();
@@ -103,6 +106,14 @@ void TerrainRenderer::update()
 			n.p.y = tn.elevation;
 
 			n.c = vec3(tn.gray, tn.gray, tn.gray);
+
+			// Count the number of connected faces.
+			int num;
+			for (num = 0; num < 6 && tn.adjacentNodes[num] != NULL; num++);
+			if (num == 2) { n.c = vec3(1,0,0); }
+			if (num == 3) { n.c = vec3(1,1,0); }
+			if (num == 4) { n.c = vec3(0,1,0); }
+			if (num == 5) { n.c = vec3(0,1,1); }
 		}
 	}
 	for (int y = 0; y < h; y++) {
