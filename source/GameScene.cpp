@@ -32,6 +32,7 @@ void GameScene::initialize()
 		}
 	}
 	fin.close();
+	terrain->analyze();
 
 	// Update the terrain renderer.
 	terrainRenderer->update();
@@ -44,7 +45,6 @@ bool GameScene::handleEvent(const sf::Event &event)
 		return true;
 	}
 	if (event.type == sf::Event::MouseButtonPressed) {
-		LOG(kLogDebug, "Mouse button %i pressed", event.mouseButton.button);
 		// Adjust camera azimuth and inclination.
 		if (event.mouseButton.button == sf::Mouse::Right) {
 			mouse_x0 = event.mouseButton.x;
@@ -61,7 +61,6 @@ bool GameScene::handleEvent(const sf::Event &event)
 		}
 	}
 	if (event.type == sf::Event::MouseButtonReleased) {
-		LOG(kLogDebug, "Mouse button %i released", event.mouseButton.button);
 		if (event.mouseButton.button == sf::Mouse::Right) {
 			mouseDraggingRight = false;
 			return true;
@@ -79,8 +78,7 @@ bool GameScene::handleEvent(const sf::Event &event)
 		}
 	}
 	if (event.type == sf::Event::MouseWheelMoved) {
-		LOG(kLogDebug, "Mouse wheel delta %i", event.mouseWheel.delta);
-		camera.distance = std::max(1.5, std::min(sqrt(100), camera.distance + (double)event.mouseWheel.delta * 0.1));
+		camera.distance = std::max(1.5, std::min(sqrt(80), camera.distance + (double)event.mouseWheel.delta * 0.1));
 		return true;
 	}
 	if (event.type == sf::Event::TextEntered) {

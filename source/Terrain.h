@@ -23,6 +23,8 @@ public:
 	Cells cells;
 	Nodes nodes;
 
+	void analyze();
+
 protected:
 	unsigned int num_cells_x, num_cells_y;
 	unsigned int num_nodes_x, num_nodes_y;

@@ -108,12 +108,19 @@ void TerrainRenderer::update()
 			n.c = vec3(tn.gray, tn.gray, tn.gray);
 
 			// Count the number of connected faces.
-			int num;
-			for (num = 0; num < 6 && tn.adjacentNodes[num] != NULL; num++);
+			int num = 0;
+			for (int i = 0; i < 6; i++) {
+				if (tn.adjacentNodes[i] != NULL)
+					num++;
+			}
 			if (num == 2) { n.c = vec3(1,0,0); }
 			if (num == 3) { n.c = vec3(1,1,0); }
 			if (num == 4) { n.c = vec3(0,1,0); }
 			if (num == 5) { n.c = vec3(0,1,1); }
+
+			// Color according to attributes.
+			if (tn.mountainTip) n.c = vec3(1,0,1);
+			if (tn.trenchFloor) n.c = vec3(0,1,0);
 		}
 	}
 	for (int y = 0; y < h; y++) {

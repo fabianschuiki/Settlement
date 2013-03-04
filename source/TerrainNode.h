@@ -16,6 +16,10 @@ public:
 	double elevation;
 
 	double gray;
+	bool ridge;
+	bool riverbed;
+	bool mountainTip;
+	bool trenchFloor;
 
 	/**
 	 * @brief The six nodes closest to this.
