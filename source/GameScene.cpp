@@ -28,6 +28,13 @@ bool GameScene::handleEvent(const sf::Event &event)
 			mouseDraggingRight = true;
 			return true;
 		}
+
+		// For debugging, calculate the near and far vertex of the clicked location.
+		if (event.mouseButton.button == sf::Mouse::Left) {
+			LOG(kLogDebug, "Clicked screen at %i x %i", event.mouseButton.x, event.mouseButton.y);
+			clickRay = camera.unproject(event.mouseButton.x, event.mouseButton.y);
+			LOG(kLogDebug, "Click ray %f x %f x %f towards %f x %f x %f", clickRay.p.x, clickRay.p.y, clickRay.p.z, clickRay.d.x, clickRay.d.y, clickRay.d.z);
+		}
 	}
 	if (event.type == sf::Event::MouseButtonReleased) {
 		LOG(kLogDebug, "Mouse button %i released", event.mouseButton.button);
@@ -77,4 +84,13 @@ void GameScene::draw(const RenderInfo &info)
 	terrainRenderer.draw(info);
 
 	if (wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+	// Draw the click ray.
+	vec3 p1 = clickRay.p;
+	vec3 p2 = clickRay.p + clickRay.d * camera.far;
+	glColor3f(1,0,0);
+	glBegin(GL_LINES);
+	glVertex3f(p1.x, p1.y, p1.z);
+	glVertex3f(p2.x, p2.y, p2.z);
+	glEnd();
 }

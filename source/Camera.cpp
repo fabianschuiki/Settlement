@@ -61,16 +61,16 @@ void Camera::updateFrustum()
 	vec3 fc = pos - z*far;
 	
 	//Compute the 4 corners of the near plane.
-	vec3 ntl = nc + y*nh - x*nw;
-	vec3 ntr = nc + y*nh + x*nw;
-	vec3 nbl = nc - y*nh - x*nw;
-	vec3 nbr = nc - y*nh + x*nw;
+	ntl = nc + y*nh - x*nw;
+	ntr = nc + y*nh + x*nw;
+	nbl = nc - y*nh - x*nw;
+	nbr = nc - y*nh + x*nw;
 	
 	//Compute the 4 corners of the far plane.
-	vec3 ftl = fc + y*fh - x*fw;
-	vec3 ftr = fc + y*fh + x*fw;
-	vec3 fbl = fc - y*fh - x*fw;
-	vec3 fbr = fc - y*fh + x*fw;
+	ftl = fc + y*fh - x*fw;
+	ftr = fc + y*fh + x*fw;
+	fbl = fc - y*fh - x*fw;
+	fbr = fc - y*fh + x*fw;
 	
 	//Compute the frustum.
 	frustum.t.set(ntr, ntl, ftl);
@@ -88,4 +88,26 @@ void Camera::setViewport(int w, int h)
 	aspect = (float)w / h;
 	
 	K = viewportWidth / (2 * tan(fov / 2));
+}
+
+/**
+ * Same as unproject(double, double), but the coordinates are in absolute pixel
+ * coordinates of the viewport. Useful for mouse click raycasting.
+ */
+Line Camera::unproject(int x, int y) const
+{
+	return unproject((double)x / viewportWidth, (double)y / viewportHeight);
+}
+
+/**
+ * Returns the light ray that hit the camera on the given relative coordinates
+ * of the near plane, fx and fy. The returned line is the set of points in the
+ * 3D space that are being projected onto the near plane.
+ */
+Line Camera::unproject(double fx, double fy) const
+{
+	vec3 nl = ntl + (nbl - ntl) * fy;
+	vec3 nr = ntr + (nbr - ntr) * fy;
+	vec3 p = nl + (nr - nl) * fx;
+	return Line(p, p-pos);
 }

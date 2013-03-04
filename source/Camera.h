@@ -2,6 +2,7 @@
 #pragma once
 #include "Frustum.h"
 #include "Vector.h"
+#include "Line.h"
 #include <gc_cpp.h>
 
 /**
@@ -20,6 +21,10 @@ public:
 	vec3 pos, up, at;
 	float K; //perspective scaling factor
 	Frustum frustum;
+
+	// Four corners of the near and far plane.
+	vec3 ntl, ntr, nbl, nbr;
+	vec3 ftl, ftr, fbl, fbr;
 	
 	Camera();
 	
@@ -28,6 +33,9 @@ public:
 	void updateFrustum();
 	
 	void setViewport(int w, int h);
+
+	Line unproject(int x, int y) const;
+	Line unproject(double fx, double fy) const;
 	
 private:
 };

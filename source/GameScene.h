@@ -27,4 +27,5 @@ protected:
 	bool wireframe;
 	int mouse_x0, mouse_y0;
 	bool mouseDraggingRight;
+	Line clickRay;
 };

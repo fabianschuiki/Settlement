@@ -37,18 +37,18 @@ public:
 		z = v.z;
 		return *this;
 	}
-	Vector<T> operator- ()	{ return Vector<T>(-x, -y, -z); }
+	Vector<T> operator- () const { return Vector<T>(-x, -y, -z); }
 	
 	//CVector-CVector
-	Vector<T> operator+ (Vector<T> v)	{ return Vector<T>(x+v.x, y+v.y, z+v.z); }
-	Vector<T> operator- (Vector<T> v)	{ return Vector<T>(x-v.x, y-v.y, z-v.z); }
-	Vector<T> operator* (Vector<T> v)	{ return Vector<T>(x*v.x, y*v.y, z*v.z); }
-	Vector<T> operator/ (Vector<T> v)	{ return Vector<T>(x/v.x, y/v.y, z/v.z); }
+	Vector<T> operator+ (Vector<T> v) const	{ return Vector<T>(x+v.x, y+v.y, z+v.z); }
+	Vector<T> operator- (Vector<T> v) const	{ return Vector<T>(x-v.x, y-v.y, z-v.z); }
+	Vector<T> operator* (Vector<T> v) const	{ return Vector<T>(x*v.x, y*v.y, z*v.z); }
+	Vector<T> operator/ (Vector<T> v) const	{ return Vector<T>(x/v.x, y/v.y, z/v.z); }
 	//CVector-Scalar
-	Vector<T> operator+ (T v)	{ return Vector<T>(x+v, y+v, z+v); }
-	Vector<T> operator- (T v)	{ return Vector<T>(x-v, y-v, z-v); }
-	Vector<T> operator* (T v)	{ return Vector<T>(x*v, y*v, z*v); }
-	Vector<T> operator/ (T v)	{ return Vector<T>(x/v, y/v, z/v); }
+	Vector<T> operator+ (T v) const	{ return Vector<T>(x+v, y+v, z+v); }
+	Vector<T> operator- (T v) const	{ return Vector<T>(x-v, y-v, z-v); }
+	Vector<T> operator* (T v) const	{ return Vector<T>(x*v, y*v, z*v); }
+	Vector<T> operator/ (T v) const	{ return Vector<T>(x/v, y/v, z/v); }
 	
 	//CVector-CVector
 	Vector<T>& operator+= (Vector<T> v)	{ x += v.x; y += v.y; z += v.z; return *this; }
@@ -63,8 +63,8 @@ public:
 	Vector<T>& operator/= (T v)	{ x /= v; y /= v; z /= v; return *this; }
 	
 	//Operations
-	inline T length2() { return x*x + y*y + z*z; }
-	inline T length()  { return sqrt(length2()); }
+	inline T length2() const { return x*x + y*y + z*z; }
+	inline T length()  const { return sqrt(length2()); }
 	
 	inline void normalize()
 	{
@@ -74,14 +74,14 @@ public:
 		y /= length;
 		z /= length;
 	}
-	inline Vector<T> unit() { Vector<T> v(*this); v.normalize(); return v; }
+	inline Vector<T> unit() const { Vector<T> v(*this); v.normalize(); return v; }
 	
-	inline T dot(Vector<T> v)
+	inline T dot(Vector<T> v) const
 	{
 		return (x*v.x + y*v.y + z*v.z);
 	}
 	
-	inline Vector<T> cross(Vector<T> v)
+	inline Vector<T> cross(Vector<T> v) const
 	{
 		return Vector<T>(y*v.z - z*v.y, z*v.x - x*v.z, x*v.y - y*v.x);
 	}
