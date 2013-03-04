@@ -2,6 +2,7 @@
 #pragma once
 #include "ApplicationObject.h"
 #include "RenderInfo.h"
+#include <SFML/Window/Event.hpp>
 #include <gc_cpp.h>
 
 /**
@@ -13,6 +14,16 @@
 class Scene : public gc, public ApplicationObject
 {
 public:
+	Scene(Application *app) : ApplicationObject(app) {}
+
+	/**
+	 * @brief Handles a window event.
+	 * Called whenever an event needs to be processed. Return true if the event
+	 * was handled, or false if some other portion of the game needs to process
+	 * it.
+	 */
+	virtual bool handleEvent(const sf::Event &event) = 0;
+
 	/**
 	 * @brief Advances the simulation.
 	 * Perform all the simulation calculation in this function. This might

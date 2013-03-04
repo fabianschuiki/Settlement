@@ -1,5 +1,6 @@
 /* Copyright © 2013 Fabian Schuiki */
 #include "Application.h"
+#include "GameScene.h"
 #include <SFML/OpenGl.hpp>
 
 // Enable the use of the logger's LOG macro.
@@ -47,6 +48,11 @@ void Application::initialize()
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 	glClearColor(0, 0, 0, 0);
+
+	// Initialize the game scene. Will change in the future.
+	GameScene *gs = new GameScene(this);
+	gs->initialize();
+	scene = gs;
 }
 
 /**
@@ -66,7 +72,11 @@ void Application::mainLoop()
 		sf::Event event;
 		while (window.pollEvent(event)) {
 			if (handleEvent(event)) continue;
+			if (scene && scene->handleEvent(event)) continue;
 		}
+
+		if (!window.isOpen())
+			break;
 
 		// Measure the time.
 		double dtr = clock.getElapsedTime().asSeconds();
@@ -112,7 +122,7 @@ void Application::cleanUp()
  */
 bool Application::handleEvent(const sf::Event &event)
 {
-	if (event.type == sf::Event::Closed) {
+	if (event.type == sf::Event::Closed || (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Escape)) {
 		window.close();
 		return true;
 	}
