@@ -62,6 +62,16 @@ void GameScene::initialize()
     cr->rectangle(0.0, 0.0, w->store->get_width(), w->store->get_height());
     cr->stroke();
 
+    cr->move_to(40, 40);
+	cr->set_source_rgb(0.8, 0.2, 0.2);
+	Cairo::RefPtr<Cairo::ToyFontFace> font =
+	Cairo::ToyFontFace::create("Bitstream Charter",
+	                           Cairo::FONT_SLANT_ITALIC,
+	                           Cairo::FONT_WEIGHT_BOLD);
+	cr->set_font_face(font);
+	cr->set_font_size(32);
+	cr->show_text("cairomm!");
+
 	w->loadTexture();
 }
 
