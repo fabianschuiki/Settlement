@@ -3,8 +3,11 @@
 #include "Application.h"
 #include "Terrain.h"
 #include "TerrainRenderer.h"
+#include "ui/Manager.h"
+#include "ui/Window.h"
 #include <SFML/OpenGL.hpp>
 #include <fstream>
+#include <cairomm/context.h>
 
 GameScene::GameScene(Application *app) : Scene(app)
 {
@@ -15,6 +18,9 @@ GameScene::GameScene(Application *app) : Scene(app)
 	terrain = new Terrain(200, 200);
 	terrainRenderer = new TerrainRenderer;
 	terrainRenderer->setTerrain(terrain);
+
+	// Initialize the UI manager.
+	ui = new ui::Manager(app);
 }
 
 void GameScene::initialize()
@@ -36,6 +42,27 @@ void GameScene::initialize()
 
 	// Update the terrain renderer.
 	terrainRenderer->update();
+
+	// Create some random empty window.
+	ui::Window* w = new ui::Window(ui);
+	w->x = 50;
+	w->y = 50;
+	w->resize(400,300);
+	
+	Cairo::RefPtr<Cairo::Context> cr = Cairo::Context::create(w->store);
+
+    cr->save(); // save the state of the context
+    cr->set_source_rgb(0.86, 0.85, 0.47);
+    cr->paint(); // fill image with the color
+    cr->restore(); // color is back to black now
+
+    cr->save();
+    // draw a border around the image
+    cr->set_line_width(20.0); // make the line wider
+    cr->rectangle(0.0, 0.0, w->store->get_width(), w->store->get_height());
+    cr->stroke();
+
+	w->loadTexture();
 }
 
 bool GameScene::handleEvent(const sf::Event &event)
@@ -104,6 +131,7 @@ void GameScene::advance(double dt)
 void GameScene::draw(const RenderInfo &info)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_DEPTH_TEST);
 	if (wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	// Update the camera viewport.
@@ -131,4 +159,13 @@ void GameScene::draw(const RenderInfo &info)
 	glVertex3f(p1.x, p1.y, p1.z);
 	glVertex3f(p2.x, p2.y, p2.z);
 	glEnd();
+
+	// Draw the user interface.
+	glDisable(GL_DEPTH_TEST);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(0, info.width, info.height, 0, -1, 1);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	ui->draw(info);
 }

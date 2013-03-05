@@ -10,6 +10,7 @@ Texture::Texture()
 	minFilter = GL_LINEAR;
 
 	glGenTextures(1, &id);
+	updateParameters();
 }
 
 Texture::~Texture()

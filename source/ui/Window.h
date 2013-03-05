@@ -19,14 +19,14 @@ namespace ui
 		void dispose();
 		void resize(unsigned int w, unsigned int h);
 
-	protected:
+	public:
 		gl::Texture texture;
 		int x, y;
 		unsigned int width, height;
 
 		void loadTexture();
 
-	private:
+	public:
 		Cairo::RefPtr<Cairo::ImageSurface> store;
 		void resizeStore(unsigned int w, unsigned int h);
 	};

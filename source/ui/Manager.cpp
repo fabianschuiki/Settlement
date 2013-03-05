@@ -1,7 +1,36 @@
 /* Copyright © 2013 Fabian Schuiki */
 #include "Manager.h"
+#include "Window.h"
+#include "../Logger.h"
+#include "../Application.h"
 using ui::Manager;
 using ui::Window;
+
+
+Manager::Manager(Application* app) : ApplicationObject(app)
+{
+}
+
+void Manager::draw(const RenderInfo& info)
+{
+	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	// Draw the visible windows.
+	for (std::list<Window*>::reverse_iterator it = visible.rbegin(); it != visible.rend(); it++) {
+		Window* w = *it;
+		glBindTexture(GL_TEXTURE_2D, w->texture.id);
+		glColor3f(1,1,1);
+		glBegin(GL_QUADS);
+		glTexCoord2f(0,0); glVertex2f(w->x, w->y);
+		glTexCoord2f(1,0); glVertex2f(w->x + w->width, w->y);
+		glTexCoord2f(1,1); glVertex2f(w->x + w->width, w->y + w->height);
+		glTexCoord2f(0,1); glVertex2f(w->x, w->y + w->height);
+		glEnd();
+	}
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
 
 /**
  * @brief Adds a window to the manager.

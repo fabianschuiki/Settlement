@@ -6,6 +6,10 @@
 class Terrain;
 class TerrainRenderer;
 
+namespace ui {
+	class Manager;
+}
+
 /**
  * @brief Renders regular gameplay.
  */
@@ -22,6 +26,7 @@ public:
 	void draw(const RenderInfo &info);
 
 	OrbitingCamera camera;
+	ui::Manager* ui;
 
 protected:
 	Terrain* terrain;
