@@ -58,6 +58,7 @@ bool GameScene::handleEvent(const sf::Event &event)
 			LOG(kLogDebug, "Clicked screen at %i x %i", event.mouseButton.x, event.mouseButton.y);
 			clickRay = camera.unproject(event.mouseButton.x, event.mouseButton.y);
 			LOG(kLogDebug, "Click ray %f x %f x %f towards %f x %f x %f", clickRay.p.x, clickRay.p.y, clickRay.p.z, clickRay.d.x, clickRay.d.y, clickRay.d.z);
+			terrainRenderer->findClickedCell(clickRay);
 		}
 	}
 	if (event.type == sf::Event::MouseButtonReleased) {

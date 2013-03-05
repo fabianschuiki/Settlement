@@ -42,8 +42,6 @@ public:
 	//CVector-CVector
 	Vector<T> operator+ (Vector<T> v) const	{ return Vector<T>(x+v.x, y+v.y, z+v.z); }
 	Vector<T> operator- (Vector<T> v) const	{ return Vector<T>(x-v.x, y-v.y, z-v.z); }
-	Vector<T> operator* (Vector<T> v) const	{ return Vector<T>(x*v.x, y*v.y, z*v.z); }
-	Vector<T> operator/ (Vector<T> v) const	{ return Vector<T>(x/v.x, y/v.y, z/v.z); }
 	//CVector-Scalar
 	Vector<T> operator+ (T v) const	{ return Vector<T>(x+v, y+v, z+v); }
 	Vector<T> operator- (T v) const	{ return Vector<T>(x-v, y-v, z-v); }
@@ -53,8 +51,6 @@ public:
 	//CVector-CVector
 	Vector<T>& operator+= (Vector<T> v)	{ x += v.x; y += v.y; z += v.z; return *this; }
 	Vector<T>& operator-= (Vector<T> v)	{ x -= v.x; y -= v.y; z -= v.z; return *this; }
-	Vector<T>& operator*= (Vector<T> v)	{ x *= v.x; y *= v.y; z *= v.z; return *this; }
-	Vector<T>& operator/= (Vector<T> v)	{ x /= v.x; y /= v.y; z /= v.z; return *this; }
 	
 	//CVector-Scalar
 	Vector<T>& operator+= (T v)	{ x += v; y += v; z += v; return *this; }
@@ -80,6 +76,9 @@ public:
 	{
 		return (x*v.x + y*v.y + z*v.z);
 	}
+
+	/// Convenience wrapper around dot().
+	T operator* (Vector<T> v) const	{ return dot(v); }
 	
 	inline Vector<T> cross(Vector<T> v) const
 	{

@@ -1,6 +1,8 @@
 /* Copyright © 2013 Fabian Schuiki */
 #include "TerrainRenderer.h"
 #include "Terrain.h"
+#include "Line.h"
+#include "TerrainCell.h"
 #include <SFML/OpenGL.hpp>
 
 
@@ -45,7 +47,7 @@ void TerrainRenderer::draw(const RenderInfo &info)
 			struct Node &c = node(x, y+1);
 			struct Node &d = node(x+1, y+1);
 
-			#define vertex(v) glColor3f(v.c.x, v.c.y, v.c.z); glNormal3f(v.n.x, v.n.y, v.n.z); glVertex3f(v.p.x, v.p.y, v.p.z)
+			#define vertex(v) if (v.hitCandidate) glColor3f(1,1,0); else if (v.hit) glColor3f(1,0,1); else glColor3f(v.c.x, v.c.y, v.c.z); glNormal3f(v.n.x, v.n.y, v.n.z); glVertex3f(v.p.x, v.p.y, v.p.z)
 
 			vertex(a);
 			vertex(b);
@@ -100,6 +102,8 @@ void TerrainRenderer::update()
 		for (int x = 0; x < w; x++) {
 			TerrainNode &tn = terrain->nodes[y * terrain->width + x];
 			Node &n = nodes[y * w + x];
+			n.hitCandidate = false;
+			n.hit = false;
 
 			n.p.x = ((x - hw) + 0.5 * (y & 1)) * ax;
 			n.p.z = (y - hh) * ay;
@@ -131,4 +135,18 @@ void TerrainRenderer::update()
 			node.n.y = 1;
 		}
 	}
+}
+
+TerrainCell* TerrainRenderer::findClickedCell(const Line& line)
+{
+	// Highlight all the cells that are potential hit candidates.
+	for (int y = 0; y < h; y++) {
+		for (int x = 0; x < w; x++) {
+			TerrainNode &tn = terrain->nodes[y * terrain->width + x];
+			Node &n = nodes[y * w + x];
+			// TODO: do stuff here, needs TerrainRenderer needs cells!
+		}
+	}
+
+	return NULL;
 }
