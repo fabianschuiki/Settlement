@@ -90,9 +90,16 @@ void Terrain::resize(unsigned int w, unsigned int h)
  */
 void Terrain::analyze()
 {
+	const double yscale = 5;
+
 	for (int y = 0; y < num_nodes_x; y++) {
 		for (int x = 0; x < num_nodes_x; x++) {
 			TerrainNode& node = nodes[y * num_nodes_x + x];
+
+			// Calculate the node's position.
+			node.position.x = x + 0.5 * (y & 1);
+			node.position.y = node.elevation * yscale;
+			node.position.z = y;
 
 			// Count the number of adjacent nodes that are above/below this
 			// node.
@@ -109,6 +116,31 @@ void Terrain::analyze()
 			// This is a mountain tip if all surrounding nodes are lower.
 			node.mountainTip = (below == 6);
 			node.trenchFloor = (above == 6);
+		}
+	}
+
+	// Calculates the normal for each cell.
+	for (int y = 0; y < num_cells_y; y++) {
+		for (int x = 0; x < num_cells_x; x++) {
+			TerrainCell& cell = cells[y * num_cells_x + x];
+			vec3 va = (cell.nodes[2]->position - cell.nodes[0]->position);
+			vec3 vb = (cell.nodes[1]->position - cell.nodes[0]->position);
+			cell.normal = va.cross(vb);
+			cell.normal.normalize();
+		}
+	}
+
+	// Calculate the normal for each node.
+	for (int y = 0; y < num_nodes_y; y++) {
+		for (int x = 0; x < num_nodes_x; x++) {
+			TerrainNode& node = nodes[y * num_nodes_x + x];
+			vec3 n;
+			for (int i = 0; i < 6; i++) {
+				if (node.cells[i])
+					n += node.cells[i]->normal;
+			}
+			n.normalize();
+			node.normal = n;
 		}
 	}
 }

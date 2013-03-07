@@ -2,6 +2,7 @@
 #pragma once
 #include "Scene.h"
 #include "OrbitingCamera.h"
+#include "Simulation.h"
 
 class Terrain;
 class TerrainRenderer;
@@ -35,4 +36,5 @@ protected:
 	int mouse_x0, mouse_y0;
 	bool mouseDraggingRight;
 	Line clickRay;
+	Simulation simulation;
 };

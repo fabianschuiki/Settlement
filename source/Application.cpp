@@ -16,12 +16,15 @@ Application::Application()
  */
 int Application::run()
 {
+	logger.push();
+
 	// TODO: Add catch block here.
 	initialize();
 	mainLoop();
 	cleanUp();
 
 	// If we've come this far, nothing bad has happened.
+	logger.pop();
 	return 0;
 }
 

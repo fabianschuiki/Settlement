@@ -21,11 +21,13 @@ find_package(BoehmGC REQUIRED)
 find_package(SFML REQUIRED system window audio network graphics)
 find_package(OpenGL REQUIRED)
 find_package(Cairomm REQUIRED)
+find_package(Boost REQUIRED COMPONENTS thread)
 
 include_directories(${BOEHMGC_INCLUDE_DIRS})
 include_directories(${SFML_INCLUDE_DIR})
 include_directories(${OPENGL_INCLUDE_DIRS})
 include_directories(${Cairomm_INCLUDE_DIRS})
+include_directories(${Boost_INCLUDE_DIRS})
 include_directories(/opt/X11/include)
 
 
@@ -44,6 +46,7 @@ target_link_libraries(${EXECUTABLE_NAME} ${BOEHMGC_LIBRARIES})
 target_link_libraries(${EXECUTABLE_NAME} ${SFML_LIBRARIES})
 target_link_libraries(${EXECUTABLE_NAME} ${OPENGL_gl_LIBRARY})
 target_link_libraries(${EXECUTABLE_NAME} ${Cairomm_LIBRARIES})
+target_link_libraries(${EXECUTABLE_NAME} ${Boost_LIBRARIES})
 
 
 # Copy the SFML frameworks into the application bundle on Mac OS X.

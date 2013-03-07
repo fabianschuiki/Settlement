@@ -43,6 +43,9 @@ void GameScene::initialize()
 	// Update the terrain renderer.
 	terrainRenderer->update();
 
+	// Initialize the camera.
+	camera.far = 1000;
+
 	// Create some random empty window.
 	ui::Window* w = new ui::Window(ui);
 	w->x = 50;
@@ -73,6 +76,9 @@ void GameScene::initialize()
 	cr->show_text("cairomm!");
 
 	w->loadTexture();
+
+	// Kick-start the simulation.
+	simulation.start();
 }
 
 bool GameScene::handleEvent(const sf::Event &event)
@@ -116,7 +122,7 @@ bool GameScene::handleEvent(const sf::Event &event)
 		}
 	}
 	if (event.type == sf::Event::MouseWheelMoved) {
-		camera.distance = std::max(1.5, std::min(sqrt(80), camera.distance + (double)event.mouseWheel.delta * 0.1));
+		camera.distance = std::max(sqrt(10), std::min(sqrt(400), camera.distance + (double)event.mouseWheel.delta * 0.1));
 		return true;
 	}
 	if (event.type == sf::Event::TextEntered) {

@@ -1,5 +1,6 @@
 /* Copyright © 2013 Fabian Schuiki */
 #pragma once
+#include "Vector.h"
 #include <gc_cpp.h>
 
 class TerrainNode;
@@ -16,4 +17,7 @@ class TerrainCell : public gc
 public:
 	/// The three corner nodes of this cell.
 	TerrainNode* nodes[3];
+
+	/// The surface normal of this cell.
+	vec3 normal;
 };

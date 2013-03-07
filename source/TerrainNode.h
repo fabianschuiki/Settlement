@@ -1,5 +1,6 @@
 /* Copyright © 2013 Fabian Schuiki */
 #pragma once
+#include "Vector.h"
 #include <gc_cpp.h>
 
 /**
@@ -14,6 +15,16 @@ public:
 
 	/// The terrain elevation at this point.
 	double elevation;
+
+	/// Position of the node.
+	vec3 position;
+
+	/**
+	 * @brief Normal of the node.
+	 * This actually is an average of the normals of the cells touching this
+	 * node.
+	 */
+	vec3 normal;
 
 	double gray;
 	bool ridge;

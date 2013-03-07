@@ -72,6 +72,20 @@ void TerrainRenderer::draw(const RenderInfo &info)
 		}
 	}
 	glEnd();
+
+	// Draw the node normals.
+	glColor3f(1, 0, 0);
+	glBegin(GL_LINES);
+	for (int x = 0; x < w; x++) {
+		for (int y = 0; y < h; y++) {
+			struct Node &node = nodes[y * w + x];
+			vec3 p0 = node.p;
+			vec3 p1 = node.p + node.n * 0.5;
+			glVertex3f(p0.x, p0.y, p0.z);
+			glVertex3f(p1.x, p1.y, p1.z);
+		}
+	}
+	glEnd();
 }
 
 void TerrainRenderer::setTerrain(Terrain *t)
@@ -105,9 +119,11 @@ void TerrainRenderer::update()
 			n.hitCandidate = false;
 			n.hit = false;
 
-			n.p.x = ((x - hw) + 0.5 * (y & 1)) * ax;
+			/*n.p.x = ((x - hw) + 0.5 * (y & 1)) * ax;
 			n.p.z = (y - hh) * ay;
-			n.p.y = tn.elevation;
+			n.p.y = tn.elevation;*/
+			n.p = tn.position;
+			n.n = tn.normal;
 
 			n.c = vec3(tn.gray, tn.gray, tn.gray);
 
@@ -123,18 +139,18 @@ void TerrainRenderer::update()
 			if (num == 5) { n.c = vec3(0,1,1); }
 
 			// Color according to attributes.
-			if (tn.mountainTip) n.c = vec3(1,0,1);
-			if (tn.trenchFloor) n.c = vec3(0,1,0);
+			//if (tn.mountainTip) n.c = vec3(1,0,1);
+			//if (tn.trenchFloor) n.c = vec3(0,1,0);
 		}
 	}
-	for (int y = 0; y < h; y++) {
+	/*for (int y = 0; y < h; y++) {
 		for (int x = 0; x < w; x++) {
 			Node &node = nodes[y * w + x];
 			node.n.x = 0;
 			node.n.z = 0;
 			node.n.y = 1;
 		}
-	}
+	}*/
 }
 
 TerrainCell* TerrainRenderer::findClickedCell(const Line& line)

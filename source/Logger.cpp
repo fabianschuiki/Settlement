@@ -50,6 +50,24 @@ Logger::Logger()
 	level = kLogError;
 }
 
+std::stack <Logger*> Logger::stack;
+
+Logger* Logger::current()
+{
+	return stack.top();
+}
+
+void Logger::push()
+{
+	stack.push(this);
+}
+
+void Logger::pop()
+{
+	assert(stack.top() == this);
+	stack.pop();
+}
+
 enum Logger::Level Logger::getLevel() const { return level; }
 void Logger::setLevel(enum Level l) { level = l; }
 
