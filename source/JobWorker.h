@@ -1,7 +1,7 @@
 /* Copyright © 2013 Fabian Schuiki */
 #pragma once
-#include <SFML/System/Mutex.hpp>
 #include <SFML/System/Thread.hpp>
+#include <boost/thread/mutex.hpp>
 
 class Job;
 class JobQueue;
@@ -21,7 +21,7 @@ public:
 	Job* getJob();
 
 private:
-	sf::Mutex mutex;
+	boost::mutex mutex;
 	JobQueue* queue;
 	Job* job;
 	sf::Thread thread;

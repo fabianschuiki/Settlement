@@ -27,7 +27,8 @@ Job* JobQueue::dispatch()
 {
 	count.wait();
 	boost::mutex::scoped_lock lock(mutex);
-	Job* job = jobs.pop();
+	Job* job = jobs.top();
+	jobs.pop();
 	// Todo: Mark the timestamp the job was dispatched.
 	return job;
 }

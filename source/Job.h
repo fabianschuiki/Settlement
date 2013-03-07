@@ -7,4 +7,6 @@ class Job : public gc
 public:
 	const int priority;
 	Job(int priority);
+
+	virtual void execute() {}
 };

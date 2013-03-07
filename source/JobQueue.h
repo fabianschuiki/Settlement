@@ -1,9 +1,10 @@
 /* Copyright © 2013 Fabian Schuiki */
 #pragma once
 #include <gc_cpp.h>
+#include <gc_allocator.h>
 #include <boost/interprocess/sync/named_semaphore.hpp>
 #include <boost/thread/mutex.hpp>
-#include <priority_queue>
+#include <queue>
 #include <vector>
 
 class Job;
@@ -47,5 +48,5 @@ private:
 	std::priority_queue <Job*, std::vector<Job*, gc_allocator<Job*> > > jobs;
 
 	/// Synchronisation for add() and dispatch().
-	boost::thread::mutex mutex;
+	boost::mutex mutex;
 };

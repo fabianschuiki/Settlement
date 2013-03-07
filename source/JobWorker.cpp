@@ -4,13 +4,13 @@
 #include "JobQueue.h"
 
 
-JobWorker::JobWorker()
+JobWorker::JobWorker() : thread(&JobWorker::threadFunc, this)
 {
 	queue = NULL;
 	job = NULL;
 }
 
-JobWorker::JobWorker(JobQueue* q)
+JobWorker::JobWorker(JobQueue* q) : thread(&JobWorker::threadFunc, this)
 {
 	queue = q;
 	job = NULL;
@@ -30,26 +30,26 @@ void JobWorker::stop()
 
 JobQueue* JobWorker::getQueue()
 {
-	sf::Lock lock(mutex);
+	boost::mutex::scoped_lock lock(mutex);
 	return queue;
 }
 
 void JobWorker::setQueue(JobQueue* q)
 {
-	sf::Lock lock(mutex);
+	boost::mutex::scoped_lock lock(mutex);
 	queue = q;
 }
 
 
 Job* JobWorker::getJob()
 {
-	sf::Lock lock(mutex);
+	boost::mutex::scoped_lock lock(mutex);
 	return job;
 }
 
 void JobWorker::setJob(Job* j)
 {
-	sf::Lock lock(mutex);
+	boost::mutex::scoped_lock lock(mutex);
 	job = j;
 }
 
@@ -60,7 +60,7 @@ void JobWorker::threadFunc()
 		// Dispatch the next Job from the queue.
 		JobQueue* q;
 		{
-			sf::Lock lock(mutex);
+			boost::mutex::scoped_lock lock(mutex);
 			q = queue;
 		}
 		Job* j = q->dispatch();
