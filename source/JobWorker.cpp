@@ -56,5 +56,19 @@ void JobWorker::setJob(Job* j)
 
 void JobWorker::threadFunc()
 {
-	
+	while (true) {
+		// Dispatch the next Job from the queue.
+		JobQueue* q;
+		{
+			sf::Lock lock(mutex);
+			q = queue;
+		}
+		Job* j = q->dispatch();
+		setJob(j);
+
+		// Execute the job.
+		j->execute();
+		setJob(NULL);
+		// Todo: Mark timestamp after job completion.
+	}
 }

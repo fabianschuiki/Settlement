@@ -19,7 +19,6 @@ public:
 	void setQueue(JobQueue* q);
 
 	Job* getJob();
-	void setJob(Job* j);
 
 private:
 	sf::Mutex mutex;
@@ -27,4 +26,5 @@ private:
 	Job* job;
 	sf::Thread thread;
 	void threadFunc();
+	void setJob(Job* j);
 };

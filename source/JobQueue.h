@@ -2,12 +2,23 @@
 #pragma once
 #include <gc_cpp.h>
 #include <boost/interprocess/sync/named_semaphore.hpp>
-#include <boost/thread/shared_mutex.hpp>
-#include <queue>
-#include <deque>
-#include <map>
+#include <boost/thread/mutex.hpp>
+#include <priority_queue>
+#include <vector>
 
 class Job;
+class JobWorker;
+
+/**
+ * @brief Queue of jobs ready for execution.
+ *
+ * The JobQueue maintains a priority queue of Job objects that are ready for
+ * execution. Typically, multiple JobWorker objects will wait at the queue for
+ * a job to become available and will then execute it.
+ *
+ * Garbage collecting the JobQueue might pose the risk that the mutex and sema-
+ * phore are not properly destroyed. Keep an eye out for such issues.
+ */
 
 class JobQueue : public gc
 {
@@ -15,29 +26,26 @@ public:
 	void add(Job* job);
 
 protected:
-	Job* dispatch(int minPriority);
+	friend class JobWorker;
+	Job* dispatch();
 
 private:
-	struct Queue {
-		/**
-		 * Semaphore holding the number of jobs with priority more or equal to
-		 * this queue's priority.
-		 */
-		boost::interprocess::named_semaphore count;
-
-		/**
-		 * Queue of jobs of the same priority that need to be executed.
-		 */
-		typedef std::queue <Job*, std::deque<Job, gc_allocator<Job*> > > Jobs;
-		Jobs jobs;
-
-		/// Protects accesses to jobs.
-		boost::thread::shared_mutex mutex;
-	};
+	/**
+	 * @brief Number of jobs in the queue.
+	 *
+	 * Job workers will halt at this semaphore until another process becomes
+	 * available.
+	 */
+	boost::interprocess::named_semaphore count;
 
 	/**
-	 * Map of priority-queue pairs.
+	 * @brief Jobs to be executed.
+	 *
+	 * The queue is ordered according to Job priority, so that high priority
+	 * jobs are dispatched first.
 	 */
-	typedef std::map <int, Queue> QueueMap;
-	QueueMap queues;
+	std::priority_queue <Job*, std::vector<Job*, gc_allocator<Job*> > > jobs;
+
+	/// Synchronisation for add() and dispatch().
+	boost::thread::mutex mutex;
 };
