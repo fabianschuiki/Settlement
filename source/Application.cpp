@@ -75,8 +75,8 @@ void Application::mainLoop()
 		// Poll events.
 		sf::Event event;
 		while (window.pollEvent(event)) {
-			if (handleEvent(event)) continue;
 			if (scene && scene->handleEvent(event)) continue;
+			if (handleEvent(event)) continue;
 		}
 
 		if (!window.isOpen())

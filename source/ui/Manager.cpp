@@ -20,6 +20,8 @@ void Manager::draw(const RenderInfo& info)
 	// Draw the visible windows.
 	for (std::list<Window*>::reverse_iterator it = visible.rbegin(); it != visible.rend(); it++) {
 		Window* w = *it;
+		if (w->needsRedraw)
+			w->redraw();
 		glBindTexture(GL_TEXTURE_2D, w->texture.id);
 		glColor3f(1,1,1);
 		glBegin(GL_QUADS);
@@ -42,18 +44,25 @@ void Manager::addWindow(Window* w)
 {
 	windows.insert(w);
 	visible.push_front(w);
+	w->setVisible(true);
 }
 
 void Manager::removeWindow(Window* w)
 {
 	windows.erase(w);
 	visible.remove(w);
+	w->setVisible(false);
 }
 
 void Manager::showWindow(Window* w)
 {
+	visible.remove(w);
+	visible.push_front(w);
+	w->setVisible(true);
 }
 
 void Manager::hideWindow(Window* w)
 {
+	visible.remove(w);
+	w->setVisible(false);
 }

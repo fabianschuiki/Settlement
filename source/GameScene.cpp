@@ -5,6 +5,7 @@
 #include "TerrainRenderer.h"
 #include "ui/Manager.h"
 #include "ui/Window.h"
+#include "ConsoleWindow.h"
 #include <SFML/OpenGL.hpp>
 #include <fstream>
 #include <cairomm/context.h>
@@ -21,6 +22,9 @@ GameScene::GameScene(Application *app) : Scene(app)
 
 	// Initialize the UI manager.
 	ui = new ui::Manager(app);
+
+	// Initialize the console window.
+	console = new ConsoleWindow(ui);
 }
 
 void GameScene::initialize()
@@ -83,9 +87,20 @@ void GameScene::initialize()
 
 bool GameScene::handleEvent(const sf::Event &event)
 {
-	if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Space) {
-		wireframe = !wireframe;
+	// If the console window is visible, it receives all the events.
+	if (console->isVisible() && console->handleEvent(event))
 		return true;
+
+	if (event.type == sf::Event::KeyPressed) {
+		switch (event.key.code) {
+			case sf::Keyboard::Space:
+				wireframe = !wireframe;
+				return true;
+			case sf::Keyboard::Tab:
+				console->show();
+				return true;
+			default: break;
+		}
 	}
 	if (event.type == sf::Event::MouseButtonPressed) {
 		// Adjust camera azimuth and inclination.
@@ -183,5 +198,6 @@ void GameScene::draw(const RenderInfo &info)
 	glOrtho(0, info.width, info.height, 0, -1, 1);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+	console->resize(info.width, console->height);
 	ui->draw(info);
 }

@@ -6,6 +6,7 @@
 
 class Terrain;
 class TerrainRenderer;
+class ConsoleWindow;
 
 namespace ui {
 	class Manager;
@@ -37,4 +38,5 @@ protected:
 	bool mouseDraggingRight;
 	Line clickRay;
 	Simulation simulation;
+	ConsoleWindow* console;
 };
