@@ -6,6 +6,7 @@
 #include "ui/Manager.h"
 #include "ui/Window.h"
 #include "ConsoleWindow.h"
+#include "BoundingVolume.h"
 #include <SFML/OpenGL.hpp>
 #include <fstream>
 #include <cairomm/context.h>
@@ -190,6 +191,19 @@ void GameScene::draw(const RenderInfo &info)
 	glVertex3f(p1.x, p1.y, p1.z);
 	glVertex3f(p2.x, p2.y, p2.z);
 	glEnd();
+
+	// Draw some bounding volume.
+	BoundingVolume bv;
+	AABox b;
+	b.x0 = 0;
+	b.y0 = 0;
+	b.z0 = 0;
+	b.x1 = 20;
+	b.y1 = 20;
+	b.z1 = 20;
+	bv.add(b);
+	glColor3f(0, 1, 0);
+	bv.draw(info);
 
 	// Draw the user interface.
 	glDisable(GL_DEPTH_TEST);

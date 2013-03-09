@@ -1,5 +1,6 @@
 /* Copyright © 2013 Fabian Schuiki */
 #pragma once
+#include "WorldEntity.h"
 #include <set>
 
 class WorldEntity;
