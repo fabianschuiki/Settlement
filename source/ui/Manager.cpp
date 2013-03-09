@@ -43,8 +43,6 @@ void Manager::draw(const RenderInfo& info)
 void Manager::addWindow(Window* w)
 {
 	windows.insert(w);
-	visible.push_front(w);
-	w->setVisible(true);
 }
 
 void Manager::removeWindow(Window* w)
