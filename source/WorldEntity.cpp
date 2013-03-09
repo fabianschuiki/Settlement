@@ -24,6 +24,9 @@ const BoundingVolume& WorldEntity::getBounds()
 	return bounds;
 }
 
+/**
+ * @brief Marks the entity's bounding volume as outdated.
+ */
 void WorldEntity::markBoundsDirty()
 {
 	if (!boundsDirty) {

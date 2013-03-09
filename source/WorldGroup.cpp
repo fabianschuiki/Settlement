@@ -5,6 +5,11 @@ WorldGroup::WorldGroup() : WorldEntity()
 {
 }
 
+/**
+ * @brief Adds the given child to the group.
+ * Also marks the group's bounding volume as dirty if appropriate, which causes
+ * the world manager to update it before rendering.
+ */
 void WorldGroup::addChild(WorldEntity* c)
 {
 	if (!children.count(c)) {
@@ -13,6 +18,11 @@ void WorldGroup::addChild(WorldEntity* c)
 	}
 }
 
+/**
+ * @brief Removes the given child from the group.
+ * Also marks the group's bounding volume as dirty, which causes the world
+ * manager to update it before rendering.
+ */
 void WorldGroup::removeChild(WorldEntity *c)
 {
 	if (children.count(c)) {
@@ -21,6 +31,11 @@ void WorldGroup::removeChild(WorldEntity *c)
 	}
 }
 
+/**
+ * @brief Recalculates the bounding volume to encapsulate all children.
+ * Should not be called directly. Use updateBoundsIfDirty() instead so no
+ * superficial updates are performed.
+ */
 void WorldGroup::updateBounds()
 {
 	boundsDirty = false;
