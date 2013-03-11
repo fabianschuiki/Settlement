@@ -100,7 +100,7 @@ void Terrain::resize(unsigned int w, unsigned int h)
  */
 void Terrain::analyze()
 {
-	const double yscale = 2;
+	const double yscale = 5;
 
 	for (int y = 0; y < num_nodes_x; y++) {
 		for (int x = 0; x < num_nodes_x; x++) {

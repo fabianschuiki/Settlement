@@ -91,11 +91,11 @@ void GameScene::initialize()
 	GLfloat ambientLight[]={0.1,0.1,0.1,1.0};    	             // set ambient light parameters
 	glLightfv(GL_LIGHT0,GL_AMBIENT,ambientLight);
 
-	GLfloat diffuseLight[]={0.8,0.8,0.8,1.0};    	             // set diffuse light parameters
-	glLightfv(GL_LIGHT0,GL_DIFFUSE,diffuseLight);
+	GLfloat diffuseLight[]={0.9,0.9,0.9,1.0};    	             // set diffuse light parameters
+	glLightfv(GL_LIGHT0, GL_DIFFUSE,diffuseLight);
 
-	GLfloat specularLight[]={0.5,0.5,0.5,1.0};  	               // set specular light parameters
-	glLightfv(GL_LIGHT0,GL_SPECULAR,specularLight);
+	GLfloat specularLight[]={0.0,0.0,0.0,1.0};  	               // set specular light parameters
+	glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);
 
 
 	glEnable(GL_LIGHT0);                         	              // activate light0
@@ -194,7 +194,7 @@ void GameScene::draw(const RenderInfo &info)
 	camera.applyViewport();
 	camera.apply();
 
-	GLfloat lightPos[]={0.0,30.0,60.0,0.0};      	              // set light position
+	GLfloat lightPos[]={1, 1, 1, 0};      	              // set light position
 	glLightfv(GL_LIGHT0,GL_POSITION,lightPos);
 
 
