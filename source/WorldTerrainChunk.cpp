@@ -96,6 +96,23 @@ void WorldTerrainChunk::update()
 			c.modelCell = &tc;
 			c.normal = tc.normal;
 
+			c.nodes[0].color = vec3(0,1,0);
+			c.nodes[1].color = vec3(0,1,0);
+			c.nodes[2].color = vec3(0,1,0);
+
+			for (int i = 0; i < 6; i++) {
+				if (&tc == terrain->getNode(4,4).cells[i]) {
+					c.nodes[0].color = vec3(0,0,1);
+					c.nodes[1].color = vec3(0,0,1);
+					c.nodes[2].color = vec3(0,0,1);
+				}
+			}
+			for (int i = 0; i < 3; i++) {
+				if (tc.nodes[i] == &terrain->getNode(4,4)) {
+					c.nodes[i].color = vec3(1,0,0);
+				}
+			}
+
 			c.nodes[0].pos = tc.nodes[0]->position;
 			c.nodes[1].pos = tc.nodes[1]->position;
 			c.nodes[2].pos = tc.nodes[2]->position;
@@ -137,9 +154,9 @@ void WorldTerrainChunk::update()
 			v.nx = n.normal.x;
 			v.ny = n.normal.y;
 			v.nz = n.normal.z;
-			v.cr = 0;
-			v.cg = 1;
-			v.cb = 0;
+			v.cr = n.color.x;
+			v.cg = n.color.y;
+			v.cb = n.color.z;
 			vertices.push_back(v);
 		}
 	}
@@ -205,6 +222,31 @@ void WorldTerrainChunk::draw(const RenderInfo &info)
 		}
 	}
 	glDisable(GL_TEXTURE_2D);*/
+
+	if (info.drawNormals & RenderInfo::kTerrainNormals) {
+		glDisable(GL_LIGHTING);
+		glBegin(GL_LINES);
+		glColor3f(1,0,0);
+		for (Cells::iterator it = cells.begin(); it != cells.end(); it++) {
+			Cell& c = *it;
+			vec3 p0 = (c.nodes[0].pos + c.nodes[1].pos + c.nodes[2].pos) / 3;
+			vec3 p1 = p0 + c.normal * 0.5;
+			glVertexvec3(p0);
+			glVertexvec3(p1);
+		}
+		glColor3f(1,1,0);
+		for (Cells::iterator it = cells.begin(); it != cells.end(); it++) {
+			Cell& c = *it;
+			for (int i = 0; i < 3; i++) {
+				vec3 p0 = c.nodes[i].pos;
+				vec3 p1 = p0 + c.nodes[i].normal * 0.5;
+				glVertexvec3(p0);
+				glVertexvec3(p1);
+			}
+		}
+		glEnd();
+		glEnable(GL_LIGHTING);
+	}
 
 	vertexBuffer.bind();
 	indexBuffer.bind();

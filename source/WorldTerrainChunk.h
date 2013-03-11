@@ -44,6 +44,7 @@ public:
 	{
 		vec3 pos;
 		vec3 normal;
+		vec3 color;
 	};
 
 	struct Cell

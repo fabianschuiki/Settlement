@@ -194,8 +194,8 @@ void GameScene::draw(const RenderInfo &info)
 	camera.applyViewport();
 	camera.apply();
 
-	GLfloat lightPos[]={1, 1, 1, 0};      	              // set light position
-	glLightfv(GL_LIGHT0,GL_POSITION,lightPos);
+	GLfloat lightPos[] = {0.75, 1, 0.5, 0};
+	glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
 
 
 	// Draw a triangle.

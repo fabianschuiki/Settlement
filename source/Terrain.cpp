@@ -69,7 +69,7 @@ void Terrain::resize(unsigned int w, unsigned int h)
 
 			// Cells touching this node.
 			for (int d = 0; d < 6; d++) {
-				int nx = x + cellOffsets[d].x;
+				int nx = x * 2 + cellOffsets[d].x;
 				int ny = y + cellOffsets[d].y;
 				if (nx >= 0 && nx < num_cells_x && ny >= 0 && ny < num_cells_y) {
 					node.cells[d] = &cells[ny * num_cells_x + nx];
