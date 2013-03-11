@@ -4,6 +4,7 @@
 #include "AABox.h"
 #include "RenderInfo.h"
 #include "Vector.h"
+#include "gl/Texture.h"
 #include <vector>
 #include <gc_allocator.h>
 
@@ -40,6 +41,7 @@ public:
 	struct Node
 	{
 		vec3 pos;
+		vec3 normal;
 	};
 
 	struct Cell
@@ -62,4 +64,7 @@ protected:
 	AABox nodeBox;
 	typedef std::vector <Cell, gc_allocator<Cell> > Cells;
 	Cells cells;
+
+	// debug texture
+	gl::Texture texture;
 };

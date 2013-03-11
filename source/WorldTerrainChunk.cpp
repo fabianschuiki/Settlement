@@ -5,6 +5,7 @@
 #include "TerrainCell.h"
 #include "Logger.h"
 #include <SFML/OpenGL.hpp>
+#include <SFML/Graphics/Image.hpp>
 
 inline void glVertexvec3(const vec3& v) { glVertex3f(v.x, v.y, v.z); }
 inline void glNormalvec3(const vec3& v) { glNormal3f(v.x, v.y, v.z); }
@@ -22,6 +23,15 @@ WorldTerrainChunk::WorldTerrainChunk()
 	chunk.x1 = 0;
 	chunk.y0 = 0;
 	chunk.y1 = 0;
+
+	// load the debug grass texture
+	texture.wrap = GL_REPEAT;
+	texture.updateParameters();
+	sf::Image img;
+	img.loadFromFile("assets/grass3.png");
+	glBindTexture(GL_TEXTURE_2D, texture.id);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img.getSize().x, img.getSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE, img.getPixelsPtr());
 }
 
 void WorldTerrainChunk::setTerrain(Terrain* t)
@@ -83,6 +93,9 @@ void WorldTerrainChunk::update()
 			c.nodes[0].pos = tc.nodes[0]->position;
 			c.nodes[1].pos = tc.nodes[1]->position;
 			c.nodes[2].pos = tc.nodes[2]->position;
+			c.nodes[0].normal = tc.nodes[0]->normal;
+			c.nodes[1].normal = tc.nodes[1]->normal;
+			c.nodes[2].normal = tc.nodes[2]->normal;
 
 			c.bounds.x0 = std::min(std::min(c.nodes[0].pos.x, c.nodes[1].pos.x), c.nodes[2].pos.x);
 			c.bounds.y0 = std::min(std::min(c.nodes[0].pos.y, c.nodes[1].pos.y), c.nodes[2].pos.y);
@@ -125,19 +138,27 @@ void WorldTerrainChunk::draw(const RenderInfo &info)
 		bounds.draw(info);
 	}
 
+	#define autotex(v) glTexCoord2f(v.x * 0.25, v.z * 0.25);
+
 	// Draw the individual cells.
+	glEnable(GL_TEXTURE_2D);
 	for (Cells::iterator it = cells.begin(); it != cells.end(); it++) {
 		Cell& c = *it;
 
-		double g = c.modelCell->nodes[1]->gray;
-		vec3 col(g, g, g);
-		glColor3f(col.x, col.y, col.z);
-		glNormalvec3(c.normal);
+		glColor3f(1,1,1);
+		glBindTexture(GL_TEXTURE_2D, texture.id);
 		glBegin(GL_TRIANGLES);
+		glNormalvec3(c.nodes[0].normal);
+		autotex(c.nodes[0].pos);
 		glVertex3f(c.nodes[0].pos.x, c.nodes[0].pos.y, c.nodes[0].pos.z);
+		glNormalvec3(c.nodes[1].normal);
+		autotex(c.nodes[1].pos);
 		glVertex3f(c.nodes[1].pos.x, c.nodes[1].pos.y, c.nodes[1].pos.z);
+		glNormalvec3(c.nodes[2].normal);
+		autotex(c.nodes[2].pos);
 		glVertex3f(c.nodes[2].pos.x, c.nodes[2].pos.y, c.nodes[2].pos.z);
 		glEnd();
+		glBindTexture(GL_TEXTURE_2D, 0);
 
 		if (info.drawNormals & RenderInfo::kTerrainNormals) {
 			vec3 p0 = (c.nodes[0].pos + c.nodes[1].pos + c.nodes[2].pos) / 3;
@@ -149,6 +170,7 @@ void WorldTerrainChunk::draw(const RenderInfo &info)
 			glEnd();
 		}
 	}
+	glDisable(GL_TEXTURE_2D);
 }
 
 WorldTerrainChunk::Cell::Cell()
