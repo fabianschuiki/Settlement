@@ -11,6 +11,7 @@ struct Vertex {
 	GLfloat x,y,z;
 	GLfloat nx,ny,nz;
 	GLfloat cr,cg,cb;
+	GLfloat u,v;
 };
 
 inline void glVertexvec3(const vec3& v) { glVertex3f(v.x, v.y, v.z); }
@@ -96,9 +97,9 @@ void WorldTerrainChunk::update()
 			c.modelCell = &tc;
 			c.normal = tc.normal;
 
-			c.nodes[0].color = vec3(0,1,0);
-			c.nodes[1].color = vec3(0,1,0);
-			c.nodes[2].color = vec3(0,1,0);
+			c.nodes[0].color = vec3(1,1,1);
+			c.nodes[1].color = vec3(1,1,1);
+			c.nodes[2].color = vec3(1,1,1);
 
 			for (int i = 0; i < 6; i++) {
 				if (&tc == terrain->getNode(4,4).cells[i]) {
@@ -157,6 +158,8 @@ void WorldTerrainChunk::update()
 			v.cr = n.color.x;
 			v.cg = n.color.y;
 			v.cb = n.color.z;
+			v.u = v.x * 0.25;
+			v.v = v.z * 0.25;
 			vertices.push_back(v);
 		}
 	}
@@ -251,19 +254,27 @@ void WorldTerrainChunk::draw(const RenderInfo &info)
 	vertexBuffer.bind();
 	indexBuffer.bind();
 
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, texture.id);
+
 	glVertexPointer(3, GL_FLOAT, sizeof(Vertex), &((Vertex*)NULL)->x);
 	glNormalPointer(GL_FLOAT, sizeof(Vertex), &((Vertex*)NULL)->nx);
 	glColorPointer(3, GL_FLOAT, sizeof(Vertex), &((Vertex*)NULL)->cr);
+	glTexCoordPointer(2, GL_FLOAT, sizeof(Vertex), &((Vertex*)NULL)->u);
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glEnableClientState(GL_NORMAL_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
 	glDrawElements(GL_TRIANGLES, cells.size()*3, GL_UNSIGNED_INT, 0);
 
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_NORMAL_ARRAY);
 	glDisableClientState(GL_COLOR_ARRAY);
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+
+	glDisable(GL_TEXTURE_2D);
 
 	vertexBuffer.unbind();
 	indexBuffer.unbind();
