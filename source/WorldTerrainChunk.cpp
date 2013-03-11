@@ -217,7 +217,11 @@ void WorldTerrainChunk::draw(const RenderInfo &info)
 	glEnableClientState(GL_NORMAL_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
 
-	glDrawElements(GL_TRIANGLES, cells.size()*3, GL_INT, 0);
+	glDrawElements(GL_TRIANGLES, cells.size()*3, GL_UNSIGNED_INT, 0);
+
+	glDisableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_COLOR_ARRAY);
 
 	vertexBuffer.unbind();
 	indexBuffer.unbind();
