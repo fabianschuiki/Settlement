@@ -100,7 +100,6 @@ void WorldTerrainChunk::update()
 		}
 	}
 
-	LOG(kLogDebug, "Calculated nodeBox to be %fx%fx%f -> %fx%fx%f", nodeBox.x0, nodeBox.y0, nodeBox.z0, nodeBox.x1, nodeBox.y1, nodeBox.z1);
 	// Since we have changed our layout, the bounding box is not valid anymore.
 	markBoundsDirty();
 }

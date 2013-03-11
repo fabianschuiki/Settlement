@@ -57,6 +57,10 @@ void Application::initialize()
 	GameScene *gs = new GameScene(this);
 	gs->initialize();
 	scene = gs;
+
+	// Initialize the render info.
+	info.drawBounds = RenderInfo::kNoBounds;
+	info.drawNormals = RenderInfo::kNoNormals;
 }
 
 /**
@@ -94,11 +98,8 @@ void Application::mainLoop()
 
 		// Draw the scene.
 		if (scene) {
-			RenderInfo info;
 			info.width  = window.getSize().x;
 			info.height = window.getSize().y;
-			info.drawBounds = RenderInfo::kAllBounds;
-			info.drawNormals = RenderInfo::kAllNormals;
 			scene->draw(info);
 		}
 
@@ -137,4 +138,46 @@ bool Application::handleEvent(const sf::Event &event)
 		return true;
 	}
 	return false;
+}
+
+void Application::executeConsoleCommand(std::vector<std::string> args)
+{
+	if (args.size() == 0)
+		return;
+	// bounds Command
+	if (args[0] == "bounds") {
+		for (int i = 1; i < args.size(); i++) {
+			if (args[i].size() == 0)
+				continue;
+			char op = args[i][0];
+			std::string fn = (op != '-' && op != '+' ? args[i] : args[i].substr(1));
+			int mask = 0;
+			if (fn == "terrain") mask = RenderInfo::kTerrainBounds;
+			if (fn == "all") mask = RenderInfo::kAllBounds;
+			if (op == '-')
+				info.drawBounds &= ~mask;
+			else if (op == '+')
+				info.drawBounds |= mask;
+			else
+				info.drawBounds ^= mask;
+		}
+	}
+	// normals Command
+	if (args[0] == "normals") {
+		for (int i = 1; i < args.size(); i++) {
+			if (args[i].size() == 0)
+				continue;
+			char op = args[i][0];
+			std::string fn = (op != '-' && op != '+' ? args[i] : args[i].substr(1));
+			int mask = 0;
+			if (fn == "terrain") mask = RenderInfo::kTerrainNormals;
+			if (fn == "all") mask = RenderInfo::kAllNormals;
+			if (op == '-')
+				info.drawNormals &= ~mask;
+			else if (op == '+')
+				info.drawNormals |= mask;
+			else
+				info.drawNormals ^= mask;
+		}
+	}
 }

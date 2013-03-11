@@ -17,4 +17,5 @@ public:
 
 private:
 	std::string input;
+	void executeCommand(std::string cmd);
 };

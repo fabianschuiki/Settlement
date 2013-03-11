@@ -1,6 +1,12 @@
 /* Copyright © 2013 Fabian Schuiki */
 #include "ConsoleWindow.h"
 #include "Logger.h"
+#include "ui/Manager.h"
+#include "Application.h"
+#include <vector>
+
+using std::vector;
+using std::string;
 
 
 ConsoleWindow::ConsoleWindow(ui::Manager* m) : ui::Window(m)
@@ -17,7 +23,7 @@ bool ConsoleWindow::handleEvent(const sf::Event& event)
 				hide();
 			} break;
 			case sf::Keyboard::Return: {
-				LOG(kLogDebug, "Executing command!");
+				executeCommand(input);
 				input.clear();
 				setNeedsRedraw();
 				hide();
@@ -61,4 +67,32 @@ void ConsoleWindow::draw(Cairo::RefPtr<Cairo::Context> ctx)
 	ctx->select_font_face("Menlo", Cairo::FONT_SLANT_NORMAL, Cairo::FONT_WEIGHT_NORMAL);
 	ctx->set_font_size(13);
 	ctx->show_text(input);
+}
+
+void ConsoleWindow::executeCommand(string cmd)
+{
+	LOG(kLogInfo, "> %s", cmd.c_str());
+
+	// Split the command into individual arguments.
+	vector <string> args;
+	size_t p = 0;
+	bool inString = false;
+	while (p != string::npos && p < cmd.size()) {
+		while (p < cmd.size() && (cmd[p] == ' ' || cmd[p] == '\t'))
+			p++;
+		inString = (cmd[p] == '"');
+		if (inString) {
+			p++;
+			if (p >= cmd.size())
+				break;
+		}
+		size_t q = cmd.find_first_of(inString ? "\"" : " \t", p);
+		args.push_back(cmd.substr(p, q-p));
+		if (inString && q != string::npos)
+			q++;
+		p = q;
+	}
+
+	// Invoke the command execution callback.
+	manager->app->executeConsoleCommand(args);
 }
