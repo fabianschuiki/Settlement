@@ -7,6 +7,12 @@
 #include <SFML/OpenGL.hpp>
 #include <SFML/Graphics/Image.hpp>
 
+struct Vertex {
+	GLfloat x,y,z;
+	GLfloat nx,ny,nz;
+	GLfloat cr,cg,cb;
+};
+
 inline void glVertexvec3(const vec3& v) { glVertex3f(v.x, v.y, v.z); }
 inline void glNormalvec3(const vec3& v) { glNormal3f(v.x, v.y, v.z); }
 
@@ -15,7 +21,7 @@ bool operator != (const WorldTerrainChunk::Chunk& a, const WorldTerrainChunk::Ch
 	return (a.x0 != b.x0 || a.x1 != b.x1 || a.y0 != b.y0 || a.y1 != b.y1);
 }
 
-WorldTerrainChunk::WorldTerrainChunk()
+WorldTerrainChunk::WorldTerrainChunk() : vertexBuffer(GL_ARRAY_BUFFER), indexBuffer(GL_ELEMENT_ARRAY_BUFFER)
 {
 	dirty = false;
 	terrain = NULL;
@@ -113,6 +119,34 @@ void WorldTerrainChunk::update()
 		}
 	}
 
+	// Update the mesh buffers.
+	std::vector <Vertex> vertices;
+	std::vector <GLint> indices;
+
+	// For now simply copy the vertices and normals for each cell's node
+	// individually. This could be optimized later.
+	for (Cells::iterator it = cells.begin(); it != cells.end(); it++) {
+		Cell& c = *it;
+		for (int i = 0; i < 3; i++) {
+			Node& n = c.nodes[i];
+			indices.push_back(vertices.size());
+			Vertex v;
+			v.x = n.pos.x;
+			v.y = n.pos.y;
+			v.z = n.pos.z;
+			v.nx = n.normal.x;
+			v.ny = n.normal.y;
+			v.nz = n.normal.z;
+			v.cr = 0;
+			v.cg = 1;
+			v.cb = 0;
+			vertices.push_back(v);
+		}
+	}
+
+	vertexBuffer.loadData(vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
+	indexBuffer.loadData(indices.size() * sizeof(GLint), &indices[0], GL_STATIC_DRAW);
+
 	// Since we have changed our layout, the bounding box is not valid anymore.
 	markBoundsDirty();
 }
@@ -141,7 +175,7 @@ void WorldTerrainChunk::draw(const RenderInfo &info)
 	#define autotex(v) glTexCoord2f(v.x * 0.25, v.z * 0.25);
 
 	// Draw the individual cells.
-	glEnable(GL_TEXTURE_2D);
+	/*glEnable(GL_TEXTURE_2D);
 	for (Cells::iterator it = cells.begin(); it != cells.end(); it++) {
 		Cell& c = *it;
 
@@ -170,7 +204,23 @@ void WorldTerrainChunk::draw(const RenderInfo &info)
 			glEnd();
 		}
 	}
-	glDisable(GL_TEXTURE_2D);
+	glDisable(GL_TEXTURE_2D);*/
+
+	vertexBuffer.bind();
+	indexBuffer.bind();
+
+	glVertexPointer(3, GL_FLOAT, sizeof(Vertex), &((Vertex*)NULL)->x);
+	glNormalPointer(GL_FLOAT, sizeof(Vertex), &((Vertex*)NULL)->nx);
+	glColorPointer(3, GL_FLOAT, sizeof(Vertex), &((Vertex*)NULL)->cr);
+
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_NORMAL_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
+
+	glDrawElements(GL_TRIANGLES, cells.size()*3, GL_INT, 0);
+
+	vertexBuffer.unbind();
+	indexBuffer.unbind();
 }
 
 WorldTerrainChunk::Cell::Cell()

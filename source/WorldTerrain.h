@@ -29,7 +29,7 @@ public:
 protected:
 	Terrain* terrain;
 
-	typedef std::vector <WorldTerrainChunk, gc_allocator<WorldTerrainChunk> > Chunks;
+	typedef std::vector <WorldTerrainChunk*, gc_allocator<WorldTerrainChunk*> > Chunks;
 	Chunks chunks;
 	bool chunksDirty;
 };

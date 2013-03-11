@@ -42,7 +42,7 @@ void WorldTerrain::draw(const RenderInfo& info)
 
 	// For now simply draw all the chunks.
 	for (Chunks::iterator it = chunks.begin(); it != chunks.end(); it++)
-		(*it).draw(info);
+		(*it)->draw(info);
 }
 
 /**
@@ -81,17 +81,18 @@ void WorldTerrain::updateChunks()
 	// Configure the individual chunks.
 	for (int y = 0; y < ch; y++) {
 		for (int x = 0; x < cw; x++) {
-			WorldTerrainChunk& chunk = chunks[y * cw + x];
-			chunk.setTerrain(terrain);
+			WorldTerrainChunk* chunk = new WorldTerrainChunk;
+			chunks[y * cw + x] = chunk;
+			chunk->setTerrain(terrain);
 
 			WorldTerrainChunk::Chunk c;
 			c.x0 = x * chunkSize;
 			c.y0 = y * chunkSize;
 			c.x1 = std::min<int>((x+1) * chunkSize, terrain->width-1);
 			c.y1 = std::min<int>((y+1) * chunkSize, terrain->height-1);
-			chunk.setChunk(c);
+			chunk->setChunk(c);
 
-			chunk.updateIfDirty();
+			chunk->updateIfDirty();
 		}
 	}
 }

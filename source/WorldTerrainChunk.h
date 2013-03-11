@@ -5,6 +5,7 @@
 #include "RenderInfo.h"
 #include "Vector.h"
 #include "gl/Texture.h"
+#include "gl/Buffer.h"
 #include <vector>
 #include <gc_cpp.h>
 #include <gc_allocator.h>
@@ -19,7 +20,7 @@ class TerrainCell;
  * supposed to be part of a bigger WorldGroup that contains the rest of the
  * world in some form.
  */
-class WorldTerrainChunk : public gc_cleanup, public WorldGroup
+class WorldTerrainChunk : public WorldGroup, public gc_cleanup
 {
 public:
 	WorldTerrainChunk();
@@ -68,4 +69,8 @@ protected:
 
 	// debug texture
 	gl::Texture texture;
+
+	// Mesh Buffers
+	gl::Buffer vertexBuffer;
+	gl::Buffer indexBuffer;
 };
