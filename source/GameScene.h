@@ -7,6 +7,7 @@
 class Terrain;
 class TerrainRenderer;
 class ConsoleWindow;
+class WorldTerrain;
 
 namespace ui {
 	class Manager;
@@ -39,4 +40,5 @@ protected:
 	Line clickRay;
 	Simulation simulation;
 	ConsoleWindow* console;
+	WorldTerrain* terrainEntity;
 };

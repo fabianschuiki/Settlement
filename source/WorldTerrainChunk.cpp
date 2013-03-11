@@ -83,9 +83,9 @@ void WorldTerrainChunk::update()
 	unsigned int cx = (chunk.x1 - chunk.x0) * 2;
 	unsigned int cy = (chunk.y1 - chunk.y0);
 	cells.resize(cx * cy);
-	for (int y = chunk.y0; y < chunk.y1; y++) {
-		for (int x = chunk.x0 * 2; x < chunk.x1 * 2; x++) {
-			TerrainCell& tc = terrain->getCell(x,y);
+	for (int y = 0; y < cy; y++) {
+		for (int x = 0; x < cx; x++) {
+			TerrainCell& tc = terrain->getCell(x + chunk.x0 * 2, y + chunk.y0);
 			Cell& c = cells[y * cx + x];
 			c.modelCell = &tc;
 			c.normal = tc.normal;

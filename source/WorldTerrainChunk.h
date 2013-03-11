@@ -6,6 +6,7 @@
 #include "Vector.h"
 #include "gl/Texture.h"
 #include <vector>
+#include <gc_cpp.h>
 #include <gc_allocator.h>
 
 class Terrain;
@@ -18,7 +19,7 @@ class TerrainCell;
  * supposed to be part of a bigger WorldGroup that contains the rest of the
  * world in some form.
  */
-class WorldTerrainChunk : public WorldGroup
+class WorldTerrainChunk : public gc_cleanup, public WorldGroup
 {
 public:
 	WorldTerrainChunk();

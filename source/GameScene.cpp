@@ -7,6 +7,7 @@
 #include "ui/Window.h"
 #include "ConsoleWindow.h"
 #include "BoundingVolume.h"
+#include "WorldTerrain.h"
 #include <SFML/OpenGL.hpp>
 #include <fstream>
 #include <cairomm/context.h>
@@ -20,6 +21,10 @@ GameScene::GameScene(Application *app) : Scene(app)
 	terrain = new Terrain(200, 200);
 	terrainRenderer = new TerrainRenderer;
 	terrainRenderer->setTerrain(terrain);
+
+	// Initialize the terrain entity.
+	terrainEntity = new WorldTerrain;
+	terrainEntity->setTerrain(terrain);
 
 	// Initialize the UI manager.
 	ui = new ui::Manager(app);
@@ -200,7 +205,12 @@ void GameScene::draw(const RenderInfo &info)
 	glColor3f(0,0,1); glVertex3f(0,1,0);
 	glEnd();
 
-	terrainRenderer->draw(info);
+	//terrainRenderer->draw(info);
+
+	// Draw the terrain entity.
+	terrainEntity->updateChunksIfDirty();
+	terrainEntity->updateBoundsIfDirty();
+	terrainEntity->draw(info);
 
 	if (wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
