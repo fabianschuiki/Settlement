@@ -29,18 +29,28 @@ void Terrain::resize(unsigned int w, unsigned int h)
 			TerrainCell &c0 = cells[y * num_cells_x + x + 0];
 			TerrainCell &c1 = cells[y * num_cells_x + x + 1];
 
-			TerrainNode &n0 = nodes[y * num_nodes_x + x];
-			TerrainNode &n1 = nodes[y * num_nodes_x + x + 1];
-			TerrainNode &n2 = nodes[(y + 1) * num_nodes_x + x + 1];
-			TerrainNode &n3 = nodes[(y + 1) * num_nodes_x + x];
+			TerrainNode &n0 = nodes[y * num_nodes_x + x/2];
+			TerrainNode &n1 = nodes[y * num_nodes_x + x/2 + 1];
+			TerrainNode &n2 = nodes[(y + 1) * num_nodes_x + x/2 + 1];
+			TerrainNode &n3 = nodes[(y + 1) * num_nodes_x + x/2];
 
-			c0.nodes[0] = &n0;
-			c0.nodes[1] = &n1;
-			c0.nodes[2] = &n3;
+			if (y & 1) {
+				c0.nodes[0] = &n0;
+				c0.nodes[1] = &n2;
+				c0.nodes[2] = &n3;
 
-			c1.nodes[0] = &n1;
-			c1.nodes[1] = &n2;
-			c1.nodes[2] = &n3;
+				c1.nodes[0] = &n0;
+				c1.nodes[1] = &n1;
+				c1.nodes[2] = &n2;
+			} else {
+				c0.nodes[0] = &n0;
+				c0.nodes[1] = &n1;
+				c0.nodes[2] = &n3;
+
+				c1.nodes[0] = &n1;
+				c1.nodes[1] = &n2;
+				c1.nodes[2] = &n3;
+			}
 		}
 	}
 
@@ -90,7 +100,7 @@ void Terrain::resize(unsigned int w, unsigned int h)
  */
 void Terrain::analyze()
 {
-	const double yscale = 5;
+	const double yscale = 2;
 
 	for (int y = 0; y < num_nodes_x; y++) {
 		for (int x = 0; x < num_nodes_x; x++) {

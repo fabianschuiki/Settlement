@@ -1,6 +1,7 @@
 /* Copyright © 2013 Fabian Schuiki */
 #pragma once
 #include "Vector.h"
+#include "WorldTerrainChunk.h"
 #include <vector>
 
 class Terrain;
@@ -31,4 +32,6 @@ protected:
 
 	unsigned int w, h;
 	std::vector<Node> nodes;
+
+	WorldTerrainChunk chunk;
 };

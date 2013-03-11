@@ -97,6 +97,8 @@ void Application::mainLoop()
 			RenderInfo info;
 			info.width  = window.getSize().x;
 			info.height = window.getSize().y;
+			info.drawBounds = RenderInfo::kAllBounds;
+			info.drawNormals = RenderInfo::kAllNormals;
 			scene->draw(info);
 		}
 

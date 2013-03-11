@@ -32,11 +32,22 @@ TerrainRenderer::TerrainRenderer()
 			node.n.y = 1;
 		}
 	}*/
+
+	WorldTerrainChunk::Chunk c;
+	c.x0 = 0;
+	c.x1 = 32;
+	c.y0 = 0;
+	c.y1 = 32;
+	chunk.setChunk(c);
 }
 
 void TerrainRenderer::draw(const RenderInfo &info)
 {
-	// Draw the terrain.
+	chunk.updateIfDirty();
+	chunk.updateBoundsIfDirty();
+	chunk.draw(info);
+
+	/*// Draw the terrain.
 	glBegin(GL_TRIANGLES);
 	for (int x = 0; x < w-1; x++) {
 		for (int y = 0; y < h-1; y += 2) {
@@ -85,7 +96,7 @@ void TerrainRenderer::draw(const RenderInfo &info)
 			glVertex3f(p1.x, p1.y, p1.z);
 		}
 	}
-	glEnd();
+	glEnd();*/
 }
 
 void TerrainRenderer::setTerrain(Terrain *t)
@@ -94,6 +105,7 @@ void TerrainRenderer::setTerrain(Terrain *t)
 		terrain = t;
 
 		// TODO: mark terrain as invalid or something similar
+		chunk.setTerrain(t);
 	}
 }
 
@@ -151,6 +163,8 @@ void TerrainRenderer::update()
 			node.n.y = 1;
 		}
 	}*/
+
+	chunk.markDirty();
 }
 
 TerrainCell* TerrainRenderer::findClickedCell(const Line& line)
