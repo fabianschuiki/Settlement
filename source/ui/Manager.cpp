@@ -31,7 +31,7 @@ void Manager::draw(const RenderInfo& info)
 		glTexCoord2f(0,1); glVertex2f(w->x, w->y + w->height);
 		glEnd();
 	}
-	glBindTexture(GL_TEXTURE_2D, 0);
+	glDisable(GL_TEXTURE_2D);
 }
 
 /**

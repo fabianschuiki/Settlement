@@ -153,6 +153,7 @@ void Application::executeConsoleCommand(std::vector<std::string> args)
 			std::string fn = (op != '-' && op != '+' ? args[i] : args[i].substr(1));
 			int mask = 0;
 			if (fn == "terrain") mask = RenderInfo::kTerrainBounds;
+			if (fn == "terrain.cell") mask = RenderInfo::kTerrainCellBounds;
 			if (fn == "all") mask = RenderInfo::kAllBounds;
 			if (op == '-')
 				info.drawBounds &= ~mask;
@@ -171,6 +172,8 @@ void Application::executeConsoleCommand(std::vector<std::string> args)
 			std::string fn = (op != '-' && op != '+' ? args[i] : args[i].substr(1));
 			int mask = 0;
 			if (fn == "terrain") mask = RenderInfo::kTerrainNormals;
+			if (fn == "terrain.cell") mask = RenderInfo::kTerrainCellNormals;
+			if (fn == "terrain.node") mask = RenderInfo::kTerrainNodeNormals;
 			if (fn == "all") mask = RenderInfo::kAllNormals;
 			if (op == '-')
 				info.drawNormals &= ~mask;

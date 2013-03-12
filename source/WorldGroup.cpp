@@ -32,6 +32,16 @@ void WorldGroup::removeChild(WorldEntity *c)
 }
 
 /**
+ * @brief Removes all children from the group.
+ * Also marks the group's bounding volume as dirty.
+ */
+void WorldGroup::removeAllChildren()
+{
+	children.clear();
+	markBoundsDirty();
+}
+
+/**
  * @brief Recalculates the bounding volume to encapsulate all children.
  * Should not be called directly. Use updateBoundsIfDirty() instead so no
  * superficial updates are performed.

@@ -1,5 +1,6 @@
 /* Copyright © 2013 Fabian Schuiki */
 #include "BoundingVolume.h"
+#include "gl/Primitives.h"
 #include <algorithm>
 #include <SFML/OpenGL.hpp>
 
@@ -62,7 +63,7 @@ void BoundingVolume::draw(const RenderInfo& info)
 {
 	if (isClear) return; // nothing to draw if the bounding volume is clear
 
-	// Simply draw the OpenGL cube.
+	/*// Simply draw the OpenGL cube.
 	#define V0 glVertex3f(box.x0, box.y0, box.z0)
 	#define V1 glVertex3f(box.x1, box.y0, box.z0)
 	#define V2 glVertex3f(box.x1, box.y0, box.z1)
@@ -80,5 +81,6 @@ void BoundingVolume::draw(const RenderInfo& info)
 	V7; V3;
 	V6; V2;
 	V5; V1;
-	glEnd();
+	glEnd();*/
+	gl::drawOutline(box);
 }

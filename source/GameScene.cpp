@@ -99,7 +99,7 @@ void GameScene::initialize()
 
 
 	glEnable(GL_LIGHT0);                         	              // activate light0
-	glEnable(GL_LIGHTING);                       	              // enable lighting
+	//glEnable(GL_LIGHTING);                       	              // enable lighting
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT, ambientLight); 
 	glEnable(GL_COLOR_MATERIAL);                 	              // activate material
 	glColorMaterial(GL_FRONT,GL_AMBIENT_AND_DIFFUSE);
@@ -139,7 +139,7 @@ bool GameScene::handleEvent(const sf::Event &event)
 			LOG(kLogDebug, "Clicked screen at %i x %i", event.mouseButton.x, event.mouseButton.y);
 			clickRay = camera.unproject(event.mouseButton.x, event.mouseButton.y);
 			LOG(kLogDebug, "Click ray %f x %f x %f towards %f x %f x %f", clickRay.p.x, clickRay.p.y, clickRay.p.z, clickRay.d.x, clickRay.d.y, clickRay.d.z);
-			terrainRenderer->findClickedCell(clickRay);
+			terrainEntity->findClickedCell(clickRay);
 		}
 	}
 	if (event.type == sf::Event::MouseButtonReleased) {

@@ -15,6 +15,7 @@ public:
 	WorldGroup();
 	void addChild(WorldEntity* c);
 	void removeChild(WorldEntity *c);
+	void removeAllChildren();
 	virtual void updateBounds();
 
 protected:

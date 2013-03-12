@@ -78,10 +78,14 @@ void WorldTerrain::updateChunks()
 	LOG(kLogInfo, "%i x %i (= %i) chunks required", cw, ch, cw*ch);
 	chunks.resize(cw*ch);
 
+	// Remove all the existing chunks from the bounding volume calculation.
+	removeAllChildren();
+
 	// Configure the individual chunks.
 	for (int y = 0; y < ch; y++) {
 		for (int x = 0; x < cw; x++) {
 			WorldTerrainChunk* chunk = new WorldTerrainChunk;
+			addChild(chunk);
 			chunks[y * cw + x] = chunk;
 			chunk->setTerrain(terrain);
 
@@ -105,4 +109,32 @@ void WorldTerrain::updateChunksIfDirty()
 {
 	if (chunksDirty)
 		updateChunks();
+}
+
+/**
+ * Finds the cell the user clicked with the given click ray.
+ * @return Returns the clicked terrain model cell, or NULL if no cell was
+ *         found to intersect with the ray.
+ */
+TerrainCell* WorldTerrain::findClickedCell(const Line& clickRay)
+{
+	// Find the chunks that intersect the line.
+	for (Chunks::iterator it = chunks.begin(); it != chunks.end(); it++) {
+		WorldTerrainChunk* chunk = *it;
+		bool b = geo::intersects(chunk->nodeBox, clickRay);
+		//chunk->highlight = b;
+		chunk->highlightedCells.clear();
+		if (b) {
+			// Find the clicked cell.
+			for (WorldTerrainChunk::Cells::iterator ic = chunk->cells.begin(); ic != chunk->cells.end(); ic++) {
+				WorldTerrainChunk::Cell& cell = *ic;
+				bool b = geo::intersects(cell.bounds, clickRay);
+				if (b) {
+					LOG(kLogDebug, "Clicked cell %p", cell.modelCell);
+					chunk->highlightedCells.insert(&cell);
+				}
+			}
+		}
+	}
+	return NULL;
 }

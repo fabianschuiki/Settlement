@@ -4,6 +4,7 @@
 #include "TerrainNode.h"
 #include "TerrainCell.h"
 #include "Logger.h"
+#include "gl/Primitives.h"
 #include <SFML/OpenGL.hpp>
 #include <SFML/Graphics/Image.hpp>
 
@@ -191,6 +192,11 @@ void WorldTerrainChunk::draw(const RenderInfo &info)
 		glColor3f(0,1,0);
 		bounds.draw(info);
 	}
+	if (info.drawBounds & RenderInfo::kTerrainCellBounds) {
+		glColor3f(1,1,0);
+		for (Cells::iterator it = cells.begin(); it != cells.end(); it++)
+			gl::drawOutline((*it).bounds);
+	}
 
 	#define autotex(v) glTexCoord2f(v.x * 0.25, v.z * 0.25);
 
@@ -227,34 +233,36 @@ void WorldTerrainChunk::draw(const RenderInfo &info)
 	glDisable(GL_TEXTURE_2D);*/
 
 	if (info.drawNormals & RenderInfo::kTerrainNormals) {
-		glDisable(GL_LIGHTING);
 		glBegin(GL_LINES);
-		glColor3f(1,0,0);
-		for (Cells::iterator it = cells.begin(); it != cells.end(); it++) {
-			Cell& c = *it;
-			vec3 p0 = (c.nodes[0].pos + c.nodes[1].pos + c.nodes[2].pos) / 3;
-			vec3 p1 = p0 + c.normal * 0.5;
-			glVertexvec3(p0);
-			glVertexvec3(p1);
-		}
-		glColor3f(1,1,0);
-		for (Cells::iterator it = cells.begin(); it != cells.end(); it++) {
-			Cell& c = *it;
-			for (int i = 0; i < 3; i++) {
-				vec3 p0 = c.nodes[i].pos;
-				vec3 p1 = p0 + c.nodes[i].normal * 0.5;
+		if (info.drawNormals & RenderInfo::kTerrainCellNormals) {
+			glColor3f(1,0,0);
+			for (Cells::iterator it = cells.begin(); it != cells.end(); it++) {
+				Cell& c = *it;
+				vec3 p0 = (c.nodes[0].pos + c.nodes[1].pos + c.nodes[2].pos) / 3;
+				vec3 p1 = p0 + c.normal * 0.5;
 				glVertexvec3(p0);
 				glVertexvec3(p1);
 			}
 		}
+		if (info.drawNormals & RenderInfo::kTerrainNodeNormals) {
+			glColor3f(1,1,0);
+			for (Cells::iterator it = cells.begin(); it != cells.end(); it++) {
+				Cell& c = *it;
+				for (int i = 0; i < 3; i++) {
+					vec3 p0 = c.nodes[i].pos;
+					vec3 p1 = p0 + c.nodes[i].normal * 0.5;
+					glVertexvec3(p0);
+					glVertexvec3(p1);
+				}
+			}
+		}
 		glEnd();
-		glEnable(GL_LIGHTING);
 	}
 
 	vertexBuffer.bind();
 	indexBuffer.bind();
 
-	glEnable(GL_TEXTURE_2D);
+	if (!highlight) glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, texture.id);
 
 	glVertexPointer(3, GL_FLOAT, sizeof(Vertex), &((Vertex*)NULL)->x);
@@ -267,7 +275,9 @@ void WorldTerrainChunk::draw(const RenderInfo &info)
 	glEnableClientState(GL_COLOR_ARRAY);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
+	glEnable(GL_LIGHTING);
 	glDrawElements(GL_TRIANGLES, cells.size()*3, GL_UNSIGNED_INT, 0);
+	glDisable(GL_LIGHTING);
 
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_NORMAL_ARRAY);
@@ -278,6 +288,18 @@ void WorldTerrainChunk::draw(const RenderInfo &info)
 
 	vertexBuffer.unbind();
 	indexBuffer.unbind();
+
+	// Draw the highlighted cells.
+	glColor3f(1,1,0);
+	for (HighlightedCells::iterator it = highlightedCells.begin(); it != highlightedCells.end(); it++) {
+		Cell* cell = *it;
+		glBegin(GL_LINE_STRIP);
+		glVertexvec3(cell->nodes[0].pos + cell->normal * 0.1);
+		glVertexvec3(cell->nodes[1].pos + cell->normal * 0.1);
+		glVertexvec3(cell->nodes[2].pos + cell->normal * 0.1);
+		glVertexvec3(cell->nodes[0].pos + cell->normal * 0.1);
+		glEnd();
+	}
 }
 
 WorldTerrainChunk::Cell::Cell()

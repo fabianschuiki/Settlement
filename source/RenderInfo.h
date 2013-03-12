@@ -19,14 +19,17 @@ public:
 	enum {
 		kNoBounds = 0,
 		kTerrainBounds = 1 << 0,
-		kAllBounds = 0x1
+		kTerrainCellBounds = 1 << 1,
+		kAllBounds = 0xffff
 	};
 
 	/// Mask of the normals to be drawn.
 	int drawNormals;
 	enum {
 		kNoNormals = 0,
-		kTerrainNormals = 1 << 0,
-		kAllNormals = 0x1
+		kTerrainNormals = (1 << 0 | 1 << 1),
+		kTerrainCellNormals = 1 << 0,
+		kTerrainNodeNormals = 1 << 1,
+		kAllNormals = 0xffff
 	};
 };

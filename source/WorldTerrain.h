@@ -1,6 +1,7 @@
 /* Copyright © 2013 Fabian Schuiki */
 #pragma once
 #include "WorldTerrainChunk.h"
+#include "Geometry.h"
 #include <gc_cpp.h>
 
 class Terrain;
@@ -25,6 +26,8 @@ public:
 	void markChunksDirty();
 	void updateChunks();
 	void updateChunksIfDirty();
+
+	TerrainCell* findClickedCell(const Line& clickRay);
 
 protected:
 	Terrain* terrain;

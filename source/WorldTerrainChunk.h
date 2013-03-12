@@ -59,6 +59,8 @@ public:
 	};
 
 protected:
+	friend class WorldTerrain;
+
 	Terrain* terrain;
 	Chunk chunk;
 	bool dirty;
@@ -74,4 +76,8 @@ protected:
 	// Mesh Buffers
 	gl::Buffer vertexBuffer;
 	gl::Buffer indexBuffer;
+
+	bool highlight;
+	typedef std::set <Cell*> HighlightedCells;
+	HighlightedCells highlightedCells;
 };
