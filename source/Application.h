@@ -3,6 +3,7 @@
 #include "Logger.h"
 #include "Scene.h"
 #include "RenderInfo.h"
+#include "Console.h"
 #include <gc_cpp.h>
 #include <SFML/Window.hpp>
 #include <string>
@@ -13,7 +14,7 @@
  * All the magic happens inside the run() function.
  */
 
-class Application : public gc
+class Application : public gc, public ConsoleCommandProvider
 {
 public:
 	Logger logger;
@@ -21,7 +22,7 @@ public:
 	Application();
 	int run();
 
-	void executeConsoleCommand(std::vector<std::string> args);
+	ConsoleCommandGroup getConsoleCommands();
 
 private:
 	sf::Window window;
@@ -34,4 +35,13 @@ private:
 	bool handleEvent(const sf::Event &event);
 
 	RenderInfo info;
+
+	// Command line interface.
+	ConsoleCommandGroup cli;
+	void cli_help(const ConsoleArgs& args);
+	void cli_quit(const ConsoleArgs& args);
+
+protected:
+	friend class ConsoleWindow;
+	void executeConsoleCommand(std::vector<std::string> args);
 };

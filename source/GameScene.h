@@ -31,6 +31,8 @@ public:
 	OrbitingCamera camera;
 	ui::Manager* ui;
 
+	ConsoleCommandGroup getConsoleCommands();
+
 protected:
 	Terrain* terrain;
 	TerrainRenderer* terrainRenderer;
@@ -41,4 +43,11 @@ protected:
 	Simulation simulation;
 	ConsoleWindow* console;
 	WorldTerrain* terrainEntity;
+
+private:
+	RenderInfo info;
+
+	ConsoleCommandGroup cli;
+	void cli_bounds(const ConsoleArgs& args);
+	void cli_normals(const ConsoleArgs& args);
 };

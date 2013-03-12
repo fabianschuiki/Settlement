@@ -106,6 +106,10 @@ void GameScene::initialize()
 
 	// Kick-start the simulation.
 	simulation.start();
+
+	// Setup the command line interface.
+	cli.add(ConsoleCommand<GameScene>::make(this, &GameScene::cli_bounds, "bounds", "Configure rendering of bounding volumes."));
+	cli.add(ConsoleCommand<GameScene>::make(this, &GameScene::cli_normals, "normals", "Configure rendering of normals."));
 }
 
 bool GameScene::handleEvent(const sf::Event &event)
@@ -182,8 +186,11 @@ void GameScene::advance(double dt)
 	camera.advance(dt);
 }
 
-void GameScene::draw(const RenderInfo &info)
+void GameScene::draw(const RenderInfo &rootInfo)
 {
+	info.width  = rootInfo.width;
+	info.height = rootInfo.height;
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 	if (wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -232,4 +239,54 @@ void GameScene::draw(const RenderInfo &info)
 	glLoadIdentity();
 	console->resize(info.width, console->height);
 	ui->draw(info);
+}
+
+ConsoleCommandGroup GameScene::getConsoleCommands()
+{
+	ConsoleCommandGroup cmds;
+	cmds.add(&cli);
+	return cmds;
+}
+
+void GameScene::cli_bounds(const ConsoleArgs& args)
+{
+	for (ConsoleArgs::const_iterator ia = args.begin(); ia != args.end(); ia++) {
+		const std::string& arg = *ia;
+		if (arg.size() == 0)
+			continue;
+		char op = arg[0];
+		std::string fn = (op != '-' && op != '+' ? arg : arg.substr(1));
+		int mask = 0;
+		if (fn == "terrain") mask = RenderInfo::kTerrainBounds;
+		if (fn == "terrain.cell") mask = RenderInfo::kTerrainCellBounds;
+		if (fn == "all") mask = RenderInfo::kAllBounds;
+		if (op == '-')
+			info.drawBounds &= ~mask;
+		else if (op == '+')
+			info.drawBounds |= mask;
+		else
+			info.drawBounds ^= mask;
+	}
+}
+
+void GameScene::cli_normals(const ConsoleArgs& args)
+{
+	for (ConsoleArgs::const_iterator ia = args.begin(); ia != args.end(); ia++) {
+		const std::string& arg = *ia;
+		if (arg.size() == 0)
+			continue;
+		char op = arg[0];
+		std::string fn = (op != '-' && op != '+' ? arg : arg.substr(1));
+		int mask = 0;
+		if (fn == "terrain") mask = RenderInfo::kTerrainNormals;
+		if (fn == "terrain.cell") mask = RenderInfo::kTerrainCellNormals;
+		if (fn == "terrain.node") mask = RenderInfo::kTerrainNodeNormals;
+		if (fn == "all") mask = RenderInfo::kAllNormals;
+		if (op == '-')
+			info.drawNormals &= ~mask;
+		else if (op == '+')
+			info.drawNormals |= mask;
+		else
+			info.drawNormals ^= mask;
+	}
 }

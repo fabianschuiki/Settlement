@@ -2,6 +2,7 @@
 #pragma once
 #include "ApplicationObject.h"
 #include "RenderInfo.h"
+#include "Console.h"
 #include <SFML/Window/Event.hpp>
 #include <gc_cpp.h>
 
@@ -40,4 +41,12 @@ public:
 	 * multiple render passes.
 	 */
 	virtual void draw(const RenderInfo &info) = 0;
+
+	/**
+	 * @brief Returns console commands that may be executed.
+	 * Subclasses of Scene may return a ConsoleCommandGroup populated with
+	 * various console commands that will be relayed from the application
+	 * console to the subclass.
+	 */
+	virtual ConsoleCommandGroup getConsoleCommands() { return ConsoleCommandGroup(); }
 };

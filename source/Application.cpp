@@ -1,6 +1,7 @@
 /* Copyright © 2013 Fabian Schuiki */
 #include "Application.h"
 #include "GameScene.h"
+#include "Console.h"
 #include <SFML/OpenGl.hpp>
 
 // Enable the use of the logger's LOG macro.
@@ -61,6 +62,10 @@ void Application::initialize()
 	// Initialize the render info.
 	info.drawBounds = RenderInfo::kNoBounds;
 	info.drawNormals = RenderInfo::kNoNormals;
+
+	// Initialize the command line interface.
+	cli.add(ConsoleCommand<Application>::make(this, &Application::cli_help, "help", "Shows a list of available commands."));
+	cli.add(ConsoleCommand<Application>::make(this, &Application::cli_quit, "quit", "Terminates the game."));
 }
 
 /**
@@ -144,7 +149,13 @@ void Application::executeConsoleCommand(std::vector<std::string> args)
 {
 	if (args.size() == 0)
 		return;
-	// bounds Command
+	ConsoleCommandGroup cmds = getConsoleCommands();
+	if (!cmds.execute(args)) {
+		LOG(kLogError, "Command \"%s\" unknown!", args[0].c_str());
+		LOG(kLogInfo, "Type \"help\" to see a list of available commands.");
+	}
+
+	/*// bounds Command
 	if (args[0] == "bounds") {
 		for (int i = 1; i < args.size(); i++) {
 			if (args[i].size() == 0)
@@ -182,5 +193,27 @@ void Application::executeConsoleCommand(std::vector<std::string> args)
 			else
 				info.drawNormals ^= mask;
 		}
-	}
+	}*/
+}
+
+/**
+ * Returns a group of viable console commands.
+ */
+ConsoleCommandGroup Application::getConsoleCommands()
+{
+	ConsoleCommandGroup g;
+	g.add(&cli);
+	if (scene) g.add(scene->getConsoleCommands());
+	return g;
+}
+
+void Application::cli_help(const ConsoleArgs& args)
+{
+	ConsoleCommandGroup cmds = getConsoleCommands();
+	LOG(kLogInfo, cmds.getHelpPage().c_str());
+}
+
+void Application::cli_quit(const ConsoleArgs& args)
+{
+	window.close();
 }
