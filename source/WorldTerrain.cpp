@@ -118,27 +118,54 @@ void WorldTerrain::updateChunksIfDirty()
  */
 TerrainCell* WorldTerrain::findClickedCell(const Line& clickRay)
 {
-	// Find the chunks that intersect the line.
+	TerrainCells cells = intersectCells(clickRay);
+	if (cells.empty()) return NULL;
+
+	// Iterate over the cells and find the one furthest up the line, i.e.
+	// the one furthest against the line's d vector.
+	TerrainCell* cell = NULL;
+	double k = 0;
+	for (TerrainCells::iterator it = cells.begin(); it != cells.end(); it++) {
+		double l = (*it)->nodes[0]->position * clickRay.d;
+		if (l < k || !cell) {
+			k = l;
+			cell = *it;
+		}
+	}
+
+	// For debuggin purposes, highlight the cell.
 	for (Chunks::iterator it = chunks.begin(); it != chunks.end(); it++) {
 		WorldTerrainChunk* chunk = *it;
-		bool b = geo::intersects(chunk->nodeBox, clickRay);
-		//chunk->highlight = b;
 		chunk->highlightedCells.clear();
-		if (b) {
-			// Find the clicked cell.
+		for (WorldTerrainChunk::Cells::iterator ic = chunk->cells.begin(); ic != chunk->cells.end(); ic++) {
+			WorldTerrainChunk::Cell& c = *ic;
+			if (c.modelCell == cell) {
+				chunk->highlightedCells.insert(&c);
+			}
+		}
+	}
+
+	return cell;
+}
+
+/**
+ * Returns a set of model cells that the given line intersects.
+ */
+WorldTerrain::TerrainCells WorldTerrain::intersectCells(const Line& l)
+{
+	TerrainCells result;
+	for (Chunks::iterator it = chunks.begin(); it != chunks.end(); it++) {
+		WorldTerrainChunk* chunk = *it;
+		if (geo::intersects(chunk->nodeBox, l)) {
 			for (WorldTerrainChunk::Cells::iterator ic = chunk->cells.begin(); ic != chunk->cells.end(); ic++) {
 				WorldTerrainChunk::Cell& cell = *ic;
-				bool b = geo::intersects(cell.bounds, clickRay);
-				if (b) {
-					LOG(kLogDebug, "Clicked cell %p", cell.modelCell);
-					bool b = geo::intersects(Triangle(cell.nodes[0].pos, cell.nodes[1].pos, cell.nodes[2].pos), clickRay);
-					if (b) {
-						chunk->highlightedCells.insert(&cell);
-						LOG(kLogImportant, "Precisely clicked cell %p", cell.modelCell);
+				if (geo::intersects(cell.bounds, l)) {
+					if (geo::intersects(Triangle(cell.nodes[0].pos, cell.nodes[1].pos, cell.nodes[2].pos), l)) {
+						result.insert(cell.modelCell);
 					}
 				}
 			}
 		}
 	}
-	return NULL;
+	return result;
 }

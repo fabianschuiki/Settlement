@@ -27,7 +27,9 @@ public:
 	void updateChunks();
 	void updateChunksIfDirty();
 
+	typedef std::set <TerrainCell*, std::less<TerrainCell*>, gc_allocator<TerrainCell*> > TerrainCells;
 	TerrainCell* findClickedCell(const Line& clickRay);
+	TerrainCells intersectCells(const Line& l);
 
 protected:
 	Terrain* terrain;
