@@ -40,6 +40,9 @@ public:
 
 	void draw(const RenderInfo &info);
 
+	void setLevelOfDetail(int l);
+	int getLevelOfDetail();
+
 	struct Node
 	{
 		vec3 pos;
@@ -52,7 +55,7 @@ public:
 		TerrainCell* modelCell;
 		AABox bounds;
 		Node nodes[3];
-		Cell* subcells[4];
+		Cell* subcells;
 		vec3 normal;
 
 		Cell();
@@ -64,6 +67,7 @@ protected:
 	Terrain* terrain;
 	Chunk chunk;
 	bool dirty;
+	int lod;
 
 	// calculated
 	AABox nodeBox;
@@ -80,4 +84,6 @@ protected:
 	bool highlight;
 	typedef std::set <Cell*> HighlightedCells;
 	HighlightedCells highlightedCells;
+
+	void activateLevelOfDetail(Cell& c, int lod);
 };

@@ -31,6 +31,7 @@ WorldTerrainChunk::WorldTerrainChunk() : vertexBuffer(GL_ARRAY_BUFFER), indexBuf
 	chunk.x1 = 0;
 	chunk.y0 = 0;
 	chunk.y1 = 0;
+	lod = 0;
 
 	// load the debug grass texture
 	texture.wrap = GL_REPEAT;
@@ -129,6 +130,8 @@ void WorldTerrainChunk::update()
 			c.bounds.y1 = std::max(std::max(c.nodes[0].pos.y, c.nodes[1].pos.y), c.nodes[2].pos.y);
 			c.bounds.z1 = std::max(std::max(c.nodes[0].pos.z, c.nodes[1].pos.z), c.nodes[2].pos.z);
 
+			activateLevelOfDetail(c, lod);
+
 			if (c.bounds.x0 < nodeBox.x0) nodeBox.x0 = c.bounds.x0;
 			if (c.bounds.y0 < nodeBox.y0) nodeBox.y0 = c.bounds.y0;
 			if (c.bounds.z0 < nodeBox.z0) nodeBox.z0 = c.bounds.z0;
@@ -156,9 +159,9 @@ void WorldTerrainChunk::update()
 			v.nx = n.normal.x;
 			v.ny = n.normal.y;
 			v.nz = n.normal.z;
-			v.cr = n.color.x;
-			v.cg = n.color.y;
-			v.cb = n.color.z;
+			v.cr = n.color.x * ((lod + 1) & 1);
+			v.cg = n.color.y * ((lod/2 + 1) & 1);
+			v.cb = n.color.z * ((lod/4 + 1) & 1);
 			v.u = v.x * 0.25;
 			v.v = v.z * 0.25;
 			vertices.push_back(v);
@@ -305,7 +308,57 @@ void WorldTerrainChunk::draw(const RenderInfo &info)
 WorldTerrainChunk::Cell::Cell()
 {
 	modelCell = NULL;
-	for (int i = 0; i < 3; i++) {
-		subcells[i] = NULL;
+	subcells = NULL;
+}
+
+/**
+ * Changes the level of detail to be used for the chunk.
+ */
+void WorldTerrainChunk::setLevelOfDetail(int l)
+{
+	if (lod != l) {
+		lod = l;
+		markDirty();
+	}
+}
+
+int WorldTerrainChunk::getLevelOfDetail()
+{
+	return lod;
+}
+
+void WorldTerrainChunk::activateLevelOfDetail(Cell& c, int lod)
+{
+	if (lod > 0) {
+		Node inter[3];
+		#define interpolate(dst, a, b) \
+			dst.pos = (a.pos + b.pos) * 0.5; \
+			dst.color = (a.color + b.color) *0.5; \
+			dst.normal = (a.normal + b.normal).unit()
+		interpolate(inter[0], c.nodes[0], c.nodes[1]);
+		interpolate(inter[1], c.nodes[1], c.nodes[2]);
+		interpolate(inter[2], c.nodes[2], c.nodes[0]);
+
+		c.subcells = new (GC) Cell [4];
+
+		c.subcells[0].nodes[0] = c.nodes[0];
+		c.subcells[0].nodes[1] = inter[0];
+		c.subcells[0].nodes[2] = inter[2];
+
+		c.subcells[1].nodes[0] = inter[0];
+		c.subcells[1].nodes[1] = inter[1];
+		c.subcells[1].nodes[2] = inter[2];
+
+		c.subcells[2].nodes[0] = inter[0];
+		c.subcells[2].nodes[1] = c.nodes[1];
+		c.subcells[2].nodes[2] = inter[1];
+
+		c.subcells[3].nodes[0] = inter[2];
+		c.subcells[3].nodes[1] = inter[1];
+		c.subcells[3].nodes[2] = c.nodes[2];
+
+		for (int i = 0; i < 4; i++) {
+			activateLevelOfDetail(c.subcells[i], lod-1);
+		}
 	}
 }

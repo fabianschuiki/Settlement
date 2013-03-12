@@ -49,8 +49,10 @@ void WorldTerrain::draw(const RenderInfo& info)
 	updateChunksIfDirty();
 
 	// For now simply draw all the chunks.
-	for (Chunks::iterator it = chunks.begin(); it != chunks.end(); it++)
+	for (Chunks::iterator it = chunks.begin(); it != chunks.end(); it++) {
+		(*it)->updateIfDirty();
 		(*it)->draw(info);
+	}
 }
 
 /**
@@ -215,7 +217,7 @@ void WorldTerrain::cli_chunk(ConsoleCall& cmd)
 	if (comma != std::string::npos) {
 		int x = atoi(a0.substr(0, comma).c_str());
 		int y = atoi(a0.substr(comma+1).c_str());
-		id = y * chunkStride * x;
+		id = y * chunkStride + x;
 	} else {
 		id = atoi(a0.c_str());
 	}
@@ -231,5 +233,11 @@ void WorldTerrain::cli_chunk(ConsoleCall& cmd)
 	ConsoleCall call(cmd);
 	call.args.assign(cmd.args.begin() + 1, cmd.args.end());
 	//chunk->getConsoleCommands().execute(call);
-	LOG(kLogDebug, "Would call command on chunk %p", chunk);
+
+	if (call.args.size() == 2) {
+		if (call.args[0] == "lod") {
+			int lod = atoi(call.args[1].c_str());
+			chunk->setLevelOfDetail(lod);
+		}
+	}
 }
