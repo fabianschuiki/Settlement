@@ -48,4 +48,55 @@ namespace geo
 	{
 		return (p.x >= b.x0 && p.x <= b.x1 && p.y >= b.y0 && p.y <= b.y1 && p.z >= b.z0 && p.z <= b.z1);
 	}
+
+	/**
+	 * @brief Intersects a plane and a line.
+	 * The intersection point is stored in q.
+	 * @return True if they intersect, false if the line is parallel to the
+	 *         plane.
+	 */
+	bool intersect(const Plane& p, const Line& l, vec3& q)
+	{
+		double ud = p.n * -l.d;
+		if (fabs(ud) <= 1e-100)
+			return false;
+		double un = p.n * l.p + p.d;
+		q = l.p + l.d * un/ud;
+		return true;
+	}
+
+	/**
+	 * @brief Intersects a triangle and a line.
+	 *
+	 * The intersection point of the triangle plane and the line is stored in q,
+	 * even if the line and the triangle don't per se intersect.
+	 *
+	 * Algorithm: http://geomalgorithms.com/a06-_intersect-2.html
+	 */
+	bool intersect(const Triangle& t, const Line& l, vec3& q)
+	{
+		// Find the intersection point between the triangle plane and the line.
+		if (!intersect(t.getPlane(), l, q))
+			return false;
+
+		// Calculate the projection of q onto the triangle sides and check
+		// whether they are within the triangle bounds.
+		vec3 u = t.b - t.a;
+		vec3 v = t.c - t.a;
+		vec3 w = q - t.a;
+		double uu = u * u;
+		double vv = v * v;
+		double uv = u * v;
+		double uv2 = uv * uv;
+		double wu = w * u;
+		double wv = w * v;
+		double K = uv2 - uu*vv;
+		double si = (uv*wv - vv*wu) / K;
+		if (si < 0 || si > 1)
+			return false;
+		double ti = (uv*wu - uu*wv) / K;
+		if (ti < 0 || (si + ti) > 1)
+			return false;
+		return true;
+	}
 }

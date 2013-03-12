@@ -131,7 +131,11 @@ TerrainCell* WorldTerrain::findClickedCell(const Line& clickRay)
 				bool b = geo::intersects(cell.bounds, clickRay);
 				if (b) {
 					LOG(kLogDebug, "Clicked cell %p", cell.modelCell);
-					chunk->highlightedCells.insert(&cell);
+					bool b = geo::intersects(Triangle(cell.nodes[0].pos, cell.nodes[1].pos, cell.nodes[2].pos), clickRay);
+					if (b) {
+						chunk->highlightedCells.insert(&cell);
+						LOG(kLogImportant, "Precisely clicked cell %p", cell.modelCell);
+					}
 				}
 			}
 		}

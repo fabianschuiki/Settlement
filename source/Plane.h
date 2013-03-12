@@ -13,6 +13,10 @@ public:
 	double d;
 	
 	Plane();
+	Plane(vec3 a, vec3 b, vec3 c)
+	{
+		set(a,b,c);
+	}
 	
 	void set(vec3 a, vec3 b, vec3 c);
 	double getDistance(vec3 p);
