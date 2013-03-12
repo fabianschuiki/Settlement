@@ -2,12 +2,20 @@
 #include "WorldTerrain.h"
 #include "Logger.h"
 #include "Terrain.h"
+#include <cstdlib>
 
 
 WorldTerrain::WorldTerrain()
 {
 	terrain = NULL;
 	chunksDirty = false;
+	chunkStride = 0;
+
+	// Initialize the command line interface.
+	cli.add(ConsoleCommand<WorldTerrain>::make(this, &WorldTerrain::cli_updatechunks, "updatechunks", "[force|mark]",
+		"Update the terrain chunks if dirty.\n"
+		"If \"force\" is added, updates the terrain chunks regardless of the dirty state. If \"mark\" is added, the chunks are marked as dirty."));
+	cli.add(ConsoleCommand<WorldTerrain>::make(this, &WorldTerrain::cli_chunk, "chunk", "<id> | <x>,<y>", "Chunk-specific commands."));
 }
 
 /**
@@ -77,6 +85,7 @@ void WorldTerrain::updateChunks()
 	int ch = ceil((double)terrain->height / chunkSize) + 1e-9;
 	LOG(kLogInfo, "%i x %i (= %i) chunks required", cw, ch, cw*ch);
 	chunks.resize(cw*ch);
+	chunkStride = cw;
 
 	// Remove all the existing chunks from the bounding volume calculation.
 	removeAllChildren();
@@ -168,4 +177,59 @@ WorldTerrain::TerrainCells WorldTerrain::intersectCells(const Line& l)
 		}
 	}
 	return result;
+}
+
+ConsoleCommandGroup WorldTerrain::getConsoleCommands()
+{
+	ConsoleCommandGroup cmds;
+	cmds.name = "terrain";
+	cmds.description = "Terrain-specific commands.";
+	cmds.add(&cli);
+	return cmds;
+}
+
+void WorldTerrain::cli_updatechunks(ConsoleCall& cmd)
+{
+	if (cmd.args.size() == 0)
+		updateChunksIfDirty();
+	else if (cmd.args[0] == "force")
+		updateChunks();
+	else if (cmd.args[0] == "mark")
+		markChunksDirty();
+	else {
+		cmd.out << "Command is malformed.\n";
+	}
+}
+
+void WorldTerrain::cli_chunk(ConsoleCall& cmd)
+{
+	if (cmd.args.size() == 0) {
+		cmd.out << "No chunk was selected. Either enter the chunk ID or the x and y coordinates.\n";
+		return;
+	}
+
+	// Resolve the chunk coordinates.
+	int id;
+	const std::string& a0 = cmd.args[0];
+	size_t comma = a0.find(",");
+	if (comma != std::string::npos) {
+		int x = atoi(a0.substr(0, comma).c_str());
+		int y = atoi(a0.substr(comma+1).c_str());
+		id = y * chunkStride * x;
+	} else {
+		id = atoi(a0.c_str());
+	}
+
+	// Check whether the ID is valid.
+	if (id < 0 || id >= chunks.size()) {
+		cmd.out << "Chunk ID " << id << " is out of range [0," << chunks.size() << ")!\n";
+		return;
+	}
+
+	// Otherwise reformulate the command and call it upon the appropriate chunk.
+	WorldTerrainChunk* chunk = chunks[id];
+	ConsoleCall call(cmd);
+	call.args.assign(cmd.args.begin() + 1, cmd.args.end());
+	//chunk->getConsoleCommands().execute(call);
+	LOG(kLogDebug, "Would call command on chunk %p", chunk);
 }

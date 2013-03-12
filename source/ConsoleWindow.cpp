@@ -94,5 +94,5 @@ void ConsoleWindow::executeCommand(string cmd)
 	}
 
 	// Invoke the command execution callback.
-	manager->app->executeConsoleCommand(args);
+	manager->app->executeConsoleCommand(cmd, args);
 }

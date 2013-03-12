@@ -64,8 +64,8 @@ void Application::initialize()
 	info.drawNormals = RenderInfo::kNoNormals;
 
 	// Initialize the command line interface.
-	cli.add(ConsoleCommand<Application>::make(this, &Application::cli_help, "help", "Shows a list of available commands."));
-	cli.add(ConsoleCommand<Application>::make(this, &Application::cli_quit, "quit", "Terminates the game."));
+	cli.add(ConsoleCommand<Application>::make(this, &Application::cli_help, "help", "[command]", "Shows a list of available commands."));
+	cli.add(ConsoleCommand<Application>::make(this, &Application::cli_quit, "quit", "", "Terminates the game."));
 }
 
 /**
@@ -145,55 +145,21 @@ bool Application::handleEvent(const sf::Event &event)
 	return false;
 }
 
-void Application::executeConsoleCommand(std::vector<std::string> args)
+void Application::executeConsoleCommand(const std::string& input, const std::vector<std::string>& args)
 {
 	if (args.size() == 0)
 		return;
 	ConsoleCommandGroup cmds = getConsoleCommands();
-	if (!cmds.execute(args)) {
+	std::stringstream out;
+	ConsoleCall call(out);
+	call.input = input;
+	call.args = args;
+	if (!cmds.execute(call)) {
 		LOG(kLogError, "Command \"%s\" unknown!", args[0].c_str());
 		LOG(kLogInfo, "Type \"help\" to see a list of available commands.");
+	} else {
+		LOG(kLogInfo, "$ %s\n%s", input.c_str(), out.str().c_str());
 	}
-
-	/*// bounds Command
-	if (args[0] == "bounds") {
-		for (int i = 1; i < args.size(); i++) {
-			if (args[i].size() == 0)
-				continue;
-			char op = args[i][0];
-			std::string fn = (op != '-' && op != '+' ? args[i] : args[i].substr(1));
-			int mask = 0;
-			if (fn == "terrain") mask = RenderInfo::kTerrainBounds;
-			if (fn == "terrain.cell") mask = RenderInfo::kTerrainCellBounds;
-			if (fn == "all") mask = RenderInfo::kAllBounds;
-			if (op == '-')
-				info.drawBounds &= ~mask;
-			else if (op == '+')
-				info.drawBounds |= mask;
-			else
-				info.drawBounds ^= mask;
-		}
-	}
-	// normals Command
-	if (args[0] == "normals") {
-		for (int i = 1; i < args.size(); i++) {
-			if (args[i].size() == 0)
-				continue;
-			char op = args[i][0];
-			std::string fn = (op != '-' && op != '+' ? args[i] : args[i].substr(1));
-			int mask = 0;
-			if (fn == "terrain") mask = RenderInfo::kTerrainNormals;
-			if (fn == "terrain.cell") mask = RenderInfo::kTerrainCellNormals;
-			if (fn == "terrain.node") mask = RenderInfo::kTerrainNodeNormals;
-			if (fn == "all") mask = RenderInfo::kAllNormals;
-			if (op == '-')
-				info.drawNormals &= ~mask;
-			else if (op == '+')
-				info.drawNormals |= mask;
-			else
-				info.drawNormals ^= mask;
-		}
-	}*/
 }
 
 /**
@@ -207,13 +173,45 @@ ConsoleCommandGroup Application::getConsoleCommands()
 	return g;
 }
 
-void Application::cli_help(const ConsoleArgs& args)
+AbstractConsoleCommand* _findCommand(ConsoleCommandGroup* grp, const std::string& name)
 {
-	ConsoleCommandGroup cmds = getConsoleCommands();
-	LOG(kLogInfo, cmds.getHelpPage().c_str());
+	for (ConsoleCommandGroup::Commands::iterator ic = grp->commands.begin(); ic != grp->commands.end(); ic++) {
+		if ((*ic)->name.empty() && (*ic)->isGroup()) {
+			AbstractConsoleCommand* r = _findCommand((ConsoleCommandGroup*)*ic, name);
+			if (r) return r;
+		}
+		if ((*ic)->name == name) {
+			return *ic;
+		}
+	}
+	return NULL;
 }
 
-void Application::cli_quit(const ConsoleArgs& args)
+void Application::cli_help(ConsoleCall& call)
+{
+	ConsoleCommandGroup cmds = getConsoleCommands();
+	AbstractConsoleCommand* cmd = &cmds;
+	std::string sequence;
+	for (ConsoleArgs::iterator it = call.args.begin(); it != call.args.end(); it++) {
+		if (!sequence.empty()) sequence += " ";
+		sequence += (*it);
+		if (cmd->isGroup()) {
+			cmd = _findCommand((ConsoleCommandGroup*)cmd, *it);
+			if (!cmd)
+				break;
+		} else {
+			cmd = NULL;
+			break;
+		}
+	}
+	if (cmd) {
+		call.out << cmd->getHelpPage().c_str() << "\n";
+	} else {
+		call.out << "The command \"" << sequence << "\" is not known.\n";
+	}
+}
+
+void Application::cli_quit(ConsoleCall& cmd)
 {
 	window.close();
 }

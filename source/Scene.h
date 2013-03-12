@@ -12,7 +12,7 @@
  * implement the draw() and advance() function.
  */
 
-class Scene : public gc, public ApplicationObject
+class Scene : public gc_cleanup, public ApplicationObject, public ConsoleCommandProvider
 {
 public:
 	Scene(Application *app) : ApplicationObject(app) {}

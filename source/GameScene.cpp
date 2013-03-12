@@ -108,8 +108,19 @@ void GameScene::initialize()
 	simulation.start();
 
 	// Setup the command line interface.
-	cli.add(ConsoleCommand<GameScene>::make(this, &GameScene::cli_bounds, "bounds", "Configure rendering of bounding volumes."));
-	cli.add(ConsoleCommand<GameScene>::make(this, &GameScene::cli_normals, "normals", "Configure rendering of normals."));
+	cli.add(ConsoleCommand<GameScene>::make(this, &GameScene::cli_bounds, "bounds", "<mask>...",
+		"Configure rendering of bounding volumes.\n"
+		"<mask> may be \"+name\" to add, \"-name\" to remove or \"name\" to toggle bounds. The following names are available:\n"
+		"  all           All possible bounding volumes.\n"
+		"  terrain       Bounds of terrain chunks.\n"
+		"  terrain.cell  Bounds of individual terrain cells."));
+	cli.add(ConsoleCommand<GameScene>::make(this, &GameScene::cli_normals, "normals", "<mask>...",
+		"Configure rendering of normals.\n"
+		"<mask> may be \"+name\" to add, \"-name\" to remove or \"name\" to toggle normals. The following names are available:\n"
+		"  all           All possible normals.\n"
+		"  terrain       All terrain normals.\n"
+		"  terrain.node  Normals of the terrain nodes (vertices).\n"
+		"  terrain.cell  Normals of the terrain cells (triangles)."));
 }
 
 bool GameScene::handleEvent(const sf::Event &event)
@@ -245,12 +256,13 @@ ConsoleCommandGroup GameScene::getConsoleCommands()
 {
 	ConsoleCommandGroup cmds;
 	cmds.add(&cli);
+	cmds.add(terrainEntity->getConsoleCommands());
 	return cmds;
 }
 
-void GameScene::cli_bounds(const ConsoleArgs& args)
+void GameScene::cli_bounds(ConsoleCall& cmd)
 {
-	for (ConsoleArgs::const_iterator ia = args.begin(); ia != args.end(); ia++) {
+	for (ConsoleArgs::const_iterator ia = cmd.args.begin(); ia != cmd.args.end(); ia++) {
 		const std::string& arg = *ia;
 		if (arg.size() == 0)
 			continue;
@@ -269,9 +281,9 @@ void GameScene::cli_bounds(const ConsoleArgs& args)
 	}
 }
 
-void GameScene::cli_normals(const ConsoleArgs& args)
+void GameScene::cli_normals(ConsoleCall& cmd)
 {
-	for (ConsoleArgs::const_iterator ia = args.begin(); ia != args.end(); ia++) {
+	for (ConsoleArgs::const_iterator ia = cmd.args.begin(); ia != cmd.args.end(); ia++) {
 		const std::string& arg = *ia;
 		if (arg.size() == 0)
 			continue;

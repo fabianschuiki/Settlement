@@ -38,10 +38,10 @@ private:
 
 	// Command line interface.
 	ConsoleCommandGroup cli;
-	void cli_help(const ConsoleArgs& args);
-	void cli_quit(const ConsoleArgs& args);
+	void cli_help(ConsoleCall&);
+	void cli_quit(ConsoleCall&);
 
 protected:
 	friend class ConsoleWindow;
-	void executeConsoleCommand(std::vector<std::string> args);
+	void executeConsoleCommand(const std::string& input, const std::vector<std::string>& args);
 };

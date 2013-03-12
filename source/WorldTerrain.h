@@ -2,6 +2,7 @@
 #pragma once
 #include "WorldTerrainChunk.h"
 #include "Geometry.h"
+#include "Console.h"
 #include <gc_cpp.h>
 
 class Terrain;
@@ -13,7 +14,7 @@ class Terrain;
  * terrain rendering into multiple small chunks that may be view frustum culled.
  */
 
-class WorldTerrain : public WorldGroup, public gc_cleanup
+class WorldTerrain : public WorldGroup, public ConsoleCommandProvider, public gc_cleanup
 {
 public:
 	WorldTerrain();
@@ -31,10 +32,18 @@ public:
 	TerrainCell* findClickedCell(const Line& clickRay);
 	TerrainCells intersectCells(const Line& l);
 
+	ConsoleCommandGroup getConsoleCommands();
+
 protected:
 	Terrain* terrain;
 
 	typedef std::vector <WorldTerrainChunk*, gc_allocator<WorldTerrainChunk*> > Chunks;
 	Chunks chunks;
 	bool chunksDirty;
+	int chunkStride;
+
+private:
+	ConsoleCommandGroup cli;
+	void cli_updatechunks(ConsoleCall&);
+	void cli_chunk(ConsoleCall&);
 };

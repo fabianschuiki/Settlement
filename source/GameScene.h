@@ -48,6 +48,6 @@ private:
 	RenderInfo info;
 
 	ConsoleCommandGroup cli;
-	void cli_bounds(const ConsoleArgs& args);
-	void cli_normals(const ConsoleArgs& args);
+	void cli_bounds(ConsoleCall& call);
+	void cli_normals(ConsoleCall& call);
 };
