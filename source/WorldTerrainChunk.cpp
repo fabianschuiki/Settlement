@@ -5,6 +5,7 @@
 #include "TerrainCell.h"
 #include "Logger.h"
 #include "gl/Primitives.h"
+#include "Perlin.h"
 #include <SFML/OpenGL.hpp>
 #include <SFML/Graphics/Image.hpp>
 
@@ -78,6 +79,33 @@ void WorldTerrainChunk::updateBounds()
 	bounds.add(nodeBox);
 }
 
+void gatherBufferData(std::vector<Vertex>& vertices, std::vector<GLint>& indices, WorldTerrainChunk::Cell& cell)
+{
+	if (cell.subcells) {
+		for (int i = 0; i < 4; i++) {
+			gatherBufferData(vertices, indices, cell.subcells[i]);
+		}
+	} else {
+		for (int i = 0; i < 3; i++) {
+			WorldTerrainChunk::Node& n = cell.nodes[i];
+			indices.push_back(vertices.size());
+			Vertex v;
+			v.x = n.pos.x;
+			v.y = n.pos.y;
+			v.z = n.pos.z;
+			v.nx = n.normal.x;
+			v.ny = n.normal.y;
+			v.nz = n.normal.z;
+			v.cr = n.color.x;
+			v.cg = n.color.y;
+			v.cb = n.color.z;
+			v.u = v.x * 0.25;
+			v.v = v.z * 0.25;
+			vertices.push_back(v);
+		}
+	}
+}
+
 void WorldTerrainChunk::update()
 {
 	dirty = false;
@@ -148,7 +176,8 @@ void WorldTerrainChunk::update()
 	// For now simply copy the vertices and normals for each cell's node
 	// individually. This could be optimized later.
 	for (Cells::iterator it = cells.begin(); it != cells.end(); it++) {
-		Cell& c = *it;
+		gatherBufferData(vertices, indices, *it);
+		/*Cell& c = *it;
 		for (int i = 0; i < 3; i++) {
 			Node& n = c.nodes[i];
 			indices.push_back(vertices.size());
@@ -165,11 +194,13 @@ void WorldTerrainChunk::update()
 			v.u = v.x * 0.25;
 			v.v = v.z * 0.25;
 			vertices.push_back(v);
-		}
+		}*/
 	}
 
+	LOG(kLogDebug, "Chunk %p: Loading %i vertices, %i indices", this, vertices.size(), indices.size());
 	vertexBuffer.loadData(vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
 	indexBuffer.loadData(indices.size() * sizeof(GLint), &indices[0], GL_STATIC_DRAW);
+	num_indices = indices.size();
 
 	// Since we have changed our layout, the bounding box is not valid anymore.
 	markBoundsDirty();
@@ -279,7 +310,7 @@ void WorldTerrainChunk::draw(const RenderInfo &info)
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
 	glEnable(GL_LIGHTING);
-	glDrawElements(GL_TRIANGLES, cells.size()*3, GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_INT, 0);
 	glDisable(GL_LIGHTING);
 
 	glDisableClientState(GL_VERTEX_ARRAY);
@@ -327,17 +358,34 @@ int WorldTerrainChunk::getLevelOfDetail()
 	return lod;
 }
 
+double terrainNoise(double x, double z)
+{
+	double v = 0;
+	const double persistence = 0.65;
+	double a = 1;
+	for (int octave = 0; octave < 8; octave++) {
+		v += Perlin::noise2(x * (octave + 1), z * (octave + 1)) * a;
+		a *= persistence;
+	}
+	return v;
+}
+
 void WorldTerrainChunk::activateLevelOfDetail(Cell& c, int lod)
 {
+	const double nscale = 0.1;
+	const double namplitude = 0.1;
 	if (lod > 0) {
 		Node inter[3];
 		#define interpolate(dst, a, b) \
 			dst.pos = (a.pos + b.pos) * 0.5; \
-			dst.color = (a.color + b.color) *0.5; \
+			dst.color = (a.color + b.color) * 0.5; \
 			dst.normal = (a.normal + b.normal).unit()
 		interpolate(inter[0], c.nodes[0], c.nodes[1]);
 		interpolate(inter[1], c.nodes[1], c.nodes[2]);
 		interpolate(inter[2], c.nodes[2], c.nodes[0]);
+
+		for (int i = 0; i < 3; i++)
+			inter[i].pos += inter[i].normal * terrainNoise(inter[i].pos.x * nscale, inter[i].pos.z * nscale)* namplitude;
 
 		c.subcells = new (GC) Cell [4];
 

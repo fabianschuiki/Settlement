@@ -80,6 +80,7 @@ protected:
 	// Mesh Buffers
 	gl::Buffer vertexBuffer;
 	gl::Buffer indexBuffer;
+	int num_indices;
 
 	bool highlight;
 	typedef std::set <Cell*> HighlightedCells;
