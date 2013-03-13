@@ -24,6 +24,21 @@ bool operator != (const WorldTerrainChunk::Chunk& a, const WorldTerrainChunk::Ch
 	return (a.x0 != b.x0 || a.x1 != b.x1 || a.y0 != b.y0 || a.y1 != b.y1);
 }
 
+double smoothNoise(double x, double z, int octaves)
+{
+	double v = 0;
+	double f = 1;
+	double a = 1;
+	double atot = 0;
+	for (int i = 0; i < octaves; i++) {
+		v += Perlin::noise2(x * f, z * f) * a;
+		atot += a;
+		f *= 2;
+		a *= 0.5;
+	}
+	return v / atot;
+}
+
 WorldTerrainChunk::WorldTerrainChunk() : vertexBuffer(GL_ARRAY_BUFFER), indexBuffer(GL_ELEMENT_ARRAY_BUFFER)
 {
 	dirty = false;
@@ -358,22 +373,10 @@ int WorldTerrainChunk::getLevelOfDetail()
 	return lod;
 }
 
-double terrainNoise(double x, double z)
-{
-	double v = 0;
-	const double persistence = 0.65;
-	double a = 1;
-	for (int octave = 0; octave < 8; octave++) {
-		v += Perlin::noise2(x * (octave + 1), z * (octave + 1)) * a;
-		a *= persistence;
-	}
-	return v;
-}
-
 void WorldTerrainChunk::activateLevelOfDetail(Cell& c, int lod)
 {
-	const double nscale = 0.1;
-	const double namplitude = 0.1;
+	const double nscale = 1;
+	const double namplitude = 0.5;
 	if (lod > 0) {
 		Node inter[3];
 		#define interpolate(dst, a, b) \
@@ -385,7 +388,7 @@ void WorldTerrainChunk::activateLevelOfDetail(Cell& c, int lod)
 		interpolate(inter[2], c.nodes[2], c.nodes[0]);
 
 		for (int i = 0; i < 3; i++)
-			inter[i].pos += inter[i].normal * terrainNoise(inter[i].pos.x * nscale, inter[i].pos.z * nscale)* namplitude;
+			inter[i].pos += inter[i].normal * smoothNoise(inter[i].pos.x * nscale, inter[i].pos.z * nscale, 8) * namplitude;
 
 		c.subcells = new (GC) Cell [4];
 
