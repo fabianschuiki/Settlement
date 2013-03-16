@@ -121,6 +121,10 @@ void GameScene::initialize()
 		"  terrain       All terrain normals.\n"
 		"  terrain.node  Normals of the terrain nodes (vertices).\n"
 		"  terrain.cell  Normals of the terrain cells (triangles)."));
+
+	// Initialize the model for debugging purposes.
+	model = new WorldModel;
+	model->setModel(ObjMeshAsset::get("Circular House.obj"));
 }
 
 bool GameScene::handleEvent(const sf::Event &event)
@@ -229,6 +233,18 @@ void GameScene::draw(const RenderInfo &rootInfo)
 	terrainEntity->updateChunksIfDirty();
 	terrainEntity->updateBoundsIfDirty();
 	terrainEntity->draw(info);
+
+	// Draw the model.
+	model->updateBufferIfDirty();
+	for (int x = 0; x < 10; x++) {
+		for (int y = 0; y < 10; y++) {
+			glPushMatrix();
+			glTranslatef(1 + x*2, 5, 1 + y*2);
+			glScalef(0.4, 0.4, 0.4);
+			model->draw(info);
+			glPopMatrix();
+		}
+	}
 
 	if (wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 

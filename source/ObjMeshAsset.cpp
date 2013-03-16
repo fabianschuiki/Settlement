@@ -2,6 +2,7 @@
 #include "ObjMeshAsset.h"
 #include "StringAsset.h"
 #include "Logger.h"
+#include "Vector.h"
 #include <sstream>
 
 using std::string;
@@ -33,15 +34,17 @@ ObjMeshAsset::~ObjMeshAsset()
 	dispose();
 }
 
+AssetStaticGetDef(ObjMeshAsset);
+
 void ObjMeshAsset::locklessLoad()
 {
 	objData->require();
 
 	// Objects loaded.
-	std::vector<obj_v> vs;
-	std::vector<obj_vn> vns;
-	std::vector<obj_vt> vts;
-	std::vector<Vertex> vertices;
+	std::vector<vec3> vs;
+	std::vector<vec3> vns;
+	std::vector<vec3> vts;
+	vertices.clear();
 	objects.clear();
 
 	// Iterate through the data line by line.
@@ -60,7 +63,7 @@ void ObjMeshAsset::locklessLoad()
 
 			// Vertex data.
 			if (op == "v") {
-				obj_v v;
+				vec3 v;
 				line >> v.x;
 				line >> v.y;
 				line >> v.z;
@@ -68,14 +71,14 @@ void ObjMeshAsset::locklessLoad()
 			}
 			// Vertex texture data.
 			else if (op == "vt") {
-				obj_vt vt;
-				line >> vt.u;
-				line >> vt.v;
+				vec3 vt;
+				line >> vt.x;
+				line >> vt.y;
 				vts.push_back(vt);
 			}
 			// Vertex normal data.
 			else if (op == "vn") {
-				obj_vn vn;
+				vec3 vn;
 				line >> vn.x;
 				line >> vn.y;
 				line >> vn.z;
@@ -89,9 +92,15 @@ void ObjMeshAsset::locklessLoad()
 					o.name = "<implicit>";
 					objects.push_back(o);
 				}
-				for (int i = 0; line.tellg() < nl - pos; i++) {
+				Triangle t;
+				int i;
+				for (i = 0; line.tellg() < nl - pos; i++) {
 					string s;
 					line >> s;
+					if (i >= 3) {
+						LOG(kLogWarning, "Ignoring face with more than 3 vertices.");
+						continue;
+					}
 
 					// Parse the line.
 					int idx_v = -1, idx_vn = -1, idx_vt = -1;
@@ -107,23 +116,36 @@ void ObjMeshAsset::locklessLoad()
 
 					// Create the vertex.
 					Vertex v;
-					v.v = vs[idx_v - 1];
+					v.r = 1;
+					v.g = 1;
+					v.b = 1;
+					v.x = vs[idx_v - 1].x;
+					v.y = vs[idx_v - 1].y;
+					v.z = vs[idx_v - 1].z;
 					if (idx_vt > 0) {
-						v.vt = vts[idx_vt - 1];
+						v.u = vts[idx_vt - 1].x;
+						v.v = vts[idx_vt - 1].y;
 					} else {
-						v.vt.u = 0;
-						v.vt.v = 0;
+						v.u = 0;
+						v.v = 0;
 					}
 					if (idx_vn > 0) {
-						v.vn = vns[idx_vn - 1];
+						v.nx = vns[idx_vn - 1].x;
+						v.ny = vns[idx_vn - 1].y;
+						v.nz = vns[idx_vn - 1].z;
 					} else {
-						v.vn.x = 0;
-						v.vn.y = 0;
-						v.vn.z = 0;
+						v.nx = 0;
+						v.ny = 0;
+						v.nz = 0;
 					}
-					objects.back().indices.push_back(vertices.size());
+					LOG(kLogDebug, "Vertex %f,%f,%f", v.x, v.y, v.z);
+					t.v[i] = vertices.size();
 					vertices.push_back(v);
 				}
+				if (i < 3) {
+					LOG(kLogWarning, "Face with less than 3 vertices detected.");
+				}
+				objects.back().triangles.push_back(t);
 			}
 			// Objects.
 			else if (op == "o") {
@@ -150,11 +172,41 @@ void ObjMeshAsset::locklessLoad()
 
 	// Dump what we know.
 	for (Objects::iterator it = objects.begin(); it != objects.end(); it++) {
-		LOG(kLogInfo, "Loaded Object %s: %i vertices, %s", (*it).name.c_str(), (*it).indices.size(), (*it).material.c_str());
+		LOG(kLogInfo, "Loaded Object %s: %i triangles, %s", (*it).name.c_str(), (*it).triangles.size(), (*it).material.c_str());
 	}
 }
 
 void ObjMeshAsset::locklessDispose()
 {
 	//objData->release();
+}
+
+int ObjMeshAsset::getVertexCount()
+{
+	return vertices.size();
+}
+
+Model::Vertex& ObjMeshAsset::getVertex(int i)
+{
+	return vertices[i];
+}
+
+int ObjMeshAsset::getMeshCount()
+{
+	return objects.size();
+}
+
+Model::Mesh& ObjMeshAsset::getMesh(int i)
+{
+	return objects[i];
+}
+
+int ObjMeshAsset::Object::getTriangleCount()
+{
+	return triangles.size();
+}
+
+Model::Triangle& ObjMeshAsset::Object::getTriangle(int i)
+{
+	return triangles[i];
 }

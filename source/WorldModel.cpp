@@ -134,14 +134,14 @@ void WorldModel::updateBuffer()
 	meshes.resize(model->getMeshCount());
 	
 	for (int im = 0; im < model->getMeshCount(); im++) {
-		Model::Mesh* modelMesh = model->getMesh(im);
+		Model::Mesh& modelMesh = model->getMesh(im);
 		Mesh& mesh = meshes[im];
 		mesh.indexBuffer = new gl::Buffer(GL_ELEMENT_ARRAY_BUFFER);
 		std::vector<GLint> indices;
 
 		// Create a new compiled Mesh object for this.
-		for (int it = 0; it < modelMesh->getTriangleCount(); it++) {
-			const Model::Triangle& triangle = modelMesh->getTriangle(it);
+		for (int it = 0; it < modelMesh.getTriangleCount(); it++) {
+			const Model::Triangle& triangle = modelMesh.getTriangle(it);
 			for (int n = 0; n < 3; n++) {
 				const Model::Vertex& v = model->getVertex(triangle.v[n]);
 				indices.push_back(vertices.size());
@@ -156,6 +156,7 @@ void WorldModel::updateBuffer()
 		}
 
 		// Load the indices into the index buffer of this mesh.
+		LOG(kLogDebug, "Loaded %i indices", indices.size());
 		mesh.num_indices = indices.size();
 		mesh.indexBuffer->loadData(indices.size() * sizeof(GLint), &indices[0], GL_STATIC_DRAW);
 	}

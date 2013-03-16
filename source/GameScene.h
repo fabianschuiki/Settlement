@@ -3,6 +3,7 @@
 #include "Scene.h"
 #include "OrbitingCamera.h"
 #include "Simulation.h"
+#include "WorldModel.h"
 
 class Terrain;
 class TerrainRenderer;
@@ -50,4 +51,6 @@ private:
 	ConsoleCommandGroup cli;
 	void cli_bounds(ConsoleCall& call);
 	void cli_normals(ConsoleCall& call);
+
+	WorldModel* model;
 };
