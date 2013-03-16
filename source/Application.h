@@ -4,6 +4,8 @@
 #include "Scene.h"
 #include "RenderInfo.h"
 #include "Console.h"
+#include "ImageAsset.h"
+#include "StringAsset.h"
 #include <gc_cpp.h>
 #include <SFML/Window.hpp>
 #include <string>
@@ -23,6 +25,9 @@ public:
 	int run();
 
 	ConsoleCommandGroup getConsoleCommands();
+
+	ImageAssetManager imageAssets;
+	StringAssetManager stringAssets;
 
 private:
 	sf::Window window;
