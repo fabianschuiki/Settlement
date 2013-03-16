@@ -13,9 +13,8 @@ using std::ifstream;
 
 
 StringAsset::StringAsset(const std::string& name, AssetManager<StringAsset>* manager)
-:	Asset(name), manager((StringAssetManager*)manager)
+:	LoadableAsset(name), manager((StringAssetManager*)manager)
 {
-	loaded = false;
 }
 
 StringAsset::~StringAsset()
@@ -23,25 +22,11 @@ StringAsset::~StringAsset()
 	dispose();
 }
 
-void StringAsset::require()
-{
-	upgrade_lock<shared_mutex> lock(mutex);
-	if (!loaded) {
-		upgrade_to_unique_lock<shared_mutex> uniqueLock(lock);
-		_locklessLoad();
-	}
-}
+AssetStaticGetDef(StringAsset);
 
-void StringAsset::load()
-{
-	unique_lock<shared_mutex> lock(mutex);
-	_locklessLoad();
-}
-
-void StringAsset::_locklessLoad()
+void StringAsset::locklessLoad()
 {
 	LOG(kLogDebug, "Loading string asset %s", name.c_str());
-	loaded = true; // prevents us from multiple load attempts if loading fails
 	string path = string("assets/") + name;
 	ifstream fin(path.c_str(), std::ios::in | std::ios::binary);
 	if (!fin.good()) {
@@ -51,13 +36,9 @@ void StringAsset::_locklessLoad()
 	str.assign((std::istreambuf_iterator<char>(fin)), std::istreambuf_iterator<char>());
 }
 
-void StringAsset::dispose()
+void StringAsset::locklessDispose()
 {
-	unique_lock<shared_mutex> lock(mutex);
-	if (loaded) {
-		loaded = false;
-		str.clear();
-	}
+	str.clear();
 }
 
 const std::string& StringAsset::getString()

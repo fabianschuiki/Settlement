@@ -4,6 +4,7 @@
 #include <gc_cpp.h>
 #include <map>
 #include <set>
+#include <stack>
 #include <boost/thread/shared_mutex.hpp>
 
 /**
@@ -23,6 +24,10 @@ template <class AssetType>
 class AssetManager : public AbstractAssetManager, public gc_cleanup
 {
 public:
+	AssetManager() { currentManagers.push(this); }
+	~AssetManager() { dispose(); }
+	void dispose() { assert(currentManagers.top() == this); currentManagers.pop(); }
+
 	/// Returns the asset for the given name.
 	AssetType* get(const std::string& name)
 	{
@@ -42,6 +47,9 @@ public:
 		return asset;
 	}
 
+	/// Returns the current asset manager for this asset type.
+	static AssetManager<AssetType>* current() { return currentManagers.top(); }
+
 protected:
 	// Containers for the chosen AssetType.
 	typedef std::map <std::string, AssetType*, std::less<std::string>, gc_allocator<std::pair<const std::string, AssetType*> > > AssetMap;
@@ -55,4 +63,11 @@ protected:
 
 	/* TODO: In the future there will be lists of assets according to their
 	 * current state (initialized, loaded, etc.). */
+
+	typedef std::stack <AssetManager<AssetType>* /*, std::deque<AssetManager<AssetType>*, gc_allocator<AssetManager<AssetType>*> > */> Stack;
+	/// Stack of asset managers of this type.
+	static Stack currentManagers;
 };
+
+// Some C++ weird-o-ism.
+template<class AssetType> typename AssetManager<AssetType>::Stack AssetManager<AssetType>::currentManagers;

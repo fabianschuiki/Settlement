@@ -67,20 +67,9 @@ void Application::initialize()
 	cli.add(ConsoleCommand<Application>::make(this, &Application::cli_help, "help", "[command]", "Shows a list of available commands."));
 	cli.add(ConsoleCommand<Application>::make(this, &Application::cli_quit, "quit", "", "Terminates the game."));
 
-	// Try the image asset manager.
-	LOG(kLogDebug, "Requesting image asset");
-	ImageAsset* ia = imageAssets.get("grass5.png");
-	LOG(kLogDebug, "Calling require() on asset");
-	ia->require();
-	LOG(kLogDebug, "Actually use the image.");
-	const sf::Image& img = ia->getImage();
-	img.saveToFile("outputFile.png");
-
-	// Fetch some string file.
-	StringAsset* sa = stringAssets.get("Circular House.mtl");
-	sa->require();
-	stringAssets.get("Circular House.mtl")->require();
-	LOG(kLogDebug, "Loaded Material:\n%s", sa->getString().c_str());
+	// Load some .obj mesh.
+	ObjMeshAsset* ma = objMeshAssets.get("Circular House.obj");
+	ma->require();
 }
 
 /**

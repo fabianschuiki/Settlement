@@ -6,6 +6,7 @@
 #include "Console.h"
 #include "ImageAsset.h"
 #include "StringAsset.h"
+#include "ObjMeshAsset.h"
 #include <gc_cpp.h>
 #include <SFML/Window.hpp>
 #include <string>
@@ -28,6 +29,7 @@ public:
 
 	ImageAssetManager imageAssets;
 	StringAssetManager stringAssets;
+	ObjMeshAssetManager objMeshAssets;
 
 private:
 	sf::Window window;

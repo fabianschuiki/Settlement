@@ -47,3 +47,6 @@ public:
 	 */
 	virtual void dispose() = 0;
 };
+
+#define AssetStaticGetDecl(AssetType) static AssetType* get(const std::string& name)
+#define AssetStaticGetDef(AssetType) AssetType* AssetType::get(const std::string& name) { return AssetType##Manager::current()->get(name); }
