@@ -4,11 +4,15 @@
 #include "TerrainNode.h"
 #include <gc_cpp.h>
 #include <vector>
+#include <set>
+
+namespace model {
+	class Building;
+}
 
 /**
  * Model class that maintains the world's terrain data.
  */
-
 class Terrain : public gc
 {
 public:
@@ -26,7 +30,14 @@ public:
 	inline TerrainCell& getCell(int x, int y) { return cells[y * num_cells_x + x]; }
 	inline TerrainNode& getNode(int x, int y) { return nodes[y * num_nodes_x + x]; }
 
+	double getElevation(int x, int y);
+
 	void analyze();
+
+	typedef std::set<model::Building*> Buildings;
+	Buildings buildings;
+	void addBuilding(model::Building *b);
+	void removeBuilding(model::Building *b);
 
 protected:
 	unsigned int num_cells_x, num_cells_y;

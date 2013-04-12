@@ -8,6 +8,7 @@
 #include "ConsoleWindow.h"
 #include "BoundingVolume.h"
 #include "WorldTerrain.h"
+#include "model/Construction.h"
 #include <SFML/OpenGL.hpp>
 #include <fstream>
 #include <cairomm/context.h>
@@ -107,6 +108,12 @@ void GameScene::initialize()
 	// Kick-start the simulation.
 	simulation.start();
 
+	// Schedule headquarters construction.
+	model::Construction c;
+	c.buildingName = "hq";
+	c.around = vec3(105, 0, 60);
+	simulation.scheduleConstruction(c);
+
 	// Setup the command line interface.
 	cli.add(ConsoleCommand<GameScene>::make(this, &GameScene::cli_bounds, "bounds", "<mask>...",
 		"Configure rendering of bounding volumes.\n"
@@ -121,6 +128,10 @@ void GameScene::initialize()
 		"  terrain       All terrain normals.\n"
 		"  terrain.node  Normals of the terrain nodes (vertices).\n"
 		"  terrain.cell  Normals of the terrain cells (triangles)."));
+	cli.add(ConsoleCommand<GameScene>::make(this, &GameScene::cli_construct, "construct", "<item>",
+		"Select tool for construction.\n"
+		"<item> may be one of the following:\n"
+		"  hq  Headquarters"));
 
 	// Initialize the model for debugging purposes.
 	model = new WorldModel;
@@ -158,7 +169,12 @@ bool GameScene::handleEvent(const sf::Event &event)
 			LOG(kLogDebug, "Clicked screen at %i x %i", event.mouseButton.x, event.mouseButton.y);
 			clickRay = camera.unproject(event.mouseButton.x, event.mouseButton.y);
 			LOG(kLogDebug, "Click ray %f x %f x %f towards %f x %f x %f", clickRay.p.x, clickRay.p.y, clickRay.p.z, clickRay.d.x, clickRay.d.y, clickRay.d.z);
-			terrainEntity->findClickedCell(clickRay);
+			TerrainCell *clickedCell = terrainEntity->findClickedCell(clickRay);
+
+			// Do construction.
+			if (!buildingName.empty()) {
+				LOG(kLogDebug, "Attempt to construct building %s", buildingName.c_str());
+			}
 		}
 	}
 	if (event.type == sf::Event::MouseButtonReleased) {
@@ -198,6 +214,7 @@ bool GameScene::handleEvent(const sf::Event &event)
 
 void GameScene::advance(double dt)
 {
+	camera.poi.y = terrain->getElevation(camera.poi.x, camera.poi.z);
 	camera.advance(dt);
 }
 
@@ -218,6 +235,17 @@ void GameScene::draw(const RenderInfo &rootInfo)
 
 	GLfloat lightPos[] = {0.75, 1, 0.5, 0};
 	glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
+
+	// Add some fog.
+	GLfloat fogDensity = 0.01;
+	GLfloat fogColor[4] = {0.25, 0.75, 1, 1.0};
+	glEnable(GL_FOG);
+	glFogi(GL_FOG_MODE, GL_EXP2);
+	glFogfv(GL_FOG_COLOR, fogColor);
+	glFogf(GL_FOG_DENSITY, fogDensity);
+	//glFogf(GL_FOG_START, 20);
+	//glFogf(GL_FOG_END, 100);
+	glHint(GL_FOG_HINT, GL_NICEST);
 
 
 	// Draw a triangle.
@@ -248,14 +276,8 @@ void GameScene::draw(const RenderInfo &rootInfo)
 
 	if (wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-	// Draw the click ray.
-	vec3 p1 = clickRay.p;
-	vec3 p2 = clickRay.p + clickRay.d * camera.far;
-	glColor3f(1,0,0);
-	glBegin(GL_LINES);
-	glVertex3f(p1.x, p1.y, p1.z);
-	glVertex3f(p2.x, p2.y, p2.z);
-	glEnd();
+	// Draw a line to locate each building in the world.
+	// ... implement this ...
 
 	// Draw the user interface.
 	glDisable(GL_DEPTH_TEST);
@@ -317,4 +339,10 @@ void GameScene::cli_normals(ConsoleCall& cmd)
 		else
 			info.drawNormals ^= mask;
 	}
+}
+
+void GameScene::cli_construct(ConsoleCall& cmd)
+{
+	if (cmd.args.size() != 1) return;
+	buildingName = cmd.args[0];
 }

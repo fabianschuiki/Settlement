@@ -4,6 +4,9 @@
 #include <gc_cpp.h>
 
 class TerrainNode;
+namespace model {
+	class Building;
+}
 
 /**
  * @brief A cell of the terrain.
@@ -20,4 +23,7 @@ public:
 
 	/// The surface normal of this cell.
 	vec3 normal;
+
+	/// The building that is occupying the cell, or null if there is none.
+	model::Building *building;
 };

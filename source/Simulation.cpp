@@ -61,5 +61,21 @@ void Simulation::threadFunc()
 
 void Simulation::advance(double dt)
 {
-	
+	// Perform constructions.
+	{
+		boost::unique_lock <boost::shared_mutex> lock(constructionQueue_mutex);
+		while (!constructionQueue.empty()) {
+			const model::Construction &c = constructionQueue.front();
+			constructionQueue.pop();
+
+			LOG(kLogDebug, "Actually constructing %s", c.buildingName.c_str());
+		}
+	}
+}
+
+void Simulation::scheduleConstruction(const model::Construction &c)
+{
+	LOG(kLogDebug, "Shall construct %s ASAP!", c.buildingName.c_str());
+	boost::unique_lock <boost::shared_mutex> lock(constructionQueue_mutex);
+	constructionQueue.push(c);
 }

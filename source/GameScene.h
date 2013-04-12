@@ -44,6 +44,7 @@ protected:
 	Simulation simulation;
 	ConsoleWindow* console;
 	WorldTerrain* terrainEntity;
+	std::string buildingName;
 
 private:
 	RenderInfo info;
@@ -51,6 +52,7 @@ private:
 	ConsoleCommandGroup cli;
 	void cli_bounds(ConsoleCall& call);
 	void cli_normals(ConsoleCall& call);
+	void cli_construct(ConsoleCall& call);
 
 	WorldModel* model;
 };

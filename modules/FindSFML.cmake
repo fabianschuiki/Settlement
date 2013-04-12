@@ -37,8 +37,8 @@ endif()
 find_path(SFML_INCLUDE_DIR SFML/Config.hpp
           PATH_SUFFIXES include
           PATHS
-          ${SFMLDIR}
           $ENV{SFMLDIR}
+          ${SFMLDIR}
           ~/Library/Frameworks
           /Library/Frameworks
           /usr/local/
@@ -47,6 +47,7 @@ find_path(SFML_INCLUDE_DIR SFML/Config.hpp
           /opt/local/  # DarwinPorts
           /opt/csw/    # Blastwave
           /opt/)
+message("SFML_INCLUDE_DIR = " ${SFMLDIR})
 
 # check the version number
 set(SFML_VERSION_OK TRUE)

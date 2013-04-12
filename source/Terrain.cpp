@@ -1,5 +1,7 @@
 /* Copyright © 2013 Fabian Schuiki */
 #include "Terrain.h"
+#include "model/Building.h"
+#include <cassert>
 
 Terrain::Terrain(unsigned int w, unsigned int h) : width(w), height(h)
 {
@@ -28,6 +30,8 @@ void Terrain::resize(unsigned int w, unsigned int h)
 		for (int x = 0; x < num_cells_x - 1; x += 2) {
 			TerrainCell &c0 = cells[y * num_cells_x + x + 0];
 			TerrainCell &c1 = cells[y * num_cells_x + x + 1];
+			c0.building = NULL;
+			c1.building = NULL;
 
 			TerrainNode &n0 = nodes[y * num_nodes_x + x/2];
 			TerrainNode &n1 = nodes[y * num_nodes_x + x/2 + 1];
@@ -152,5 +156,44 @@ void Terrain::analyze()
 			n.normalize();
 			node.normal = n;
 		}
+	}
+}
+
+double Terrain::getElevation(int x, int y)
+{
+	if (x < 0) x = 0;
+	if (y < 0) y = 0;
+	if (x >= width) x = width-1;
+	if (y >= height) y = height-1;
+	return getNode(x,y).position.y;
+}
+
+void Terrain::addBuilding(model::Building *b)
+{
+	assert(buildings.count(b) == 0 && "Building is already added to the terrain.");
+	buildings.insert(b);
+
+	// Position the building in the middle of its occupied cells.
+	b->position = vec3();
+	for (model::Building::Cells::iterator it = b->cells.begin(); it != b->cells.end(); it++) {
+		TerrainCell *c = *it;
+		c->building = b;
+		b->position += c->nodes[0]->position;
+		b->position += c->nodes[1]->position;
+		b->position += c->nodes[2]->position;
+	}
+	b->position /= b->cells.size() * 3;
+}
+
+void Terrain::removeBuilding(model::Building *b)
+{
+	assert(buildings.count(b) != 0 && "Building is not part of the terrain.");
+	buildings.erase(b);
+
+	// Remove the building from the occupied cells.
+	for (model::Building::Cells::iterator it = b->cells.begin(); it != b->cells.end(); it++) {
+		TerrainCell *c = *it;
+		assert(c->building == b && "Removing building from cell that has not the building set as its occupying structure.");
+		c->building = NULL;
 	}
 }
